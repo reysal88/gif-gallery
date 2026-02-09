@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GIF Gallery</title>
+</head>
+<body>
+
+<h2>Contoh GIF</h2>
+
+<img src="gifs/1.gif" width="200">
+<img src="gifs/2.gif" width="200">
+<img src="gifs/3.gif" width="200">
+
+</body>
+</html>
