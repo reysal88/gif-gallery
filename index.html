@@ -16,10 +16,20 @@ body{
   min-height:100vh;
 }
 
-/* JUDUL */
+/* JUDUL WARNA-WARNI KEDIP */
+@keyframes colorBlink {
+  0%   { color:#ff4d4d; opacity:1; }
+  20%  { color:#ffb84d; opacity:0.8; }
+  40%  { color:#4dff4d; opacity:1; }
+  60%  { color:#4dd2ff; opacity:0.8; }
+  80%  { color:#b84dff; opacity:1; }
+  100% { color:#ff4d4d; opacity:1; }
+}
+
 h1{
   margin-top:40px;
   font-size:28px;
+  animation: colorBlink 2s infinite;
 }
 
 /* MENU */
@@ -37,9 +47,9 @@ h1{
 }
 
 .menu img{
-  width:40vw;        /* fleksibel */
-  max-width:240px;   /* batas desktop */
-  min-width:140px;   /* batas hp */
+  width:40vw;        
+  max-width:240px;   
+  min-width:140px;   
   border-radius:20px;
   border:2px solid #ccc;
   display:block;
@@ -63,7 +73,7 @@ footer{
 }
 
 .footer-right a{
-  text-decoration:none;  /* hilangkan garis underline */
+  text-decoration:none;  
   display:inline-block;
 }
 
