@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rialo GIFs</title>
+
+<!-- GLightbox CSS -->
+<link href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" rel="stylesheet">
+
+<style>
+body {
+  background-color: #f5f0e6;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+header h1 {
+  margin: 40px 0 30px 0;
+  font-size: 2.4em;
+  color: #333;
+}
+
+/* GIF Gallery */
+.gif-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 15px;
+}
+
+.gif-item {
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f4e6;
+  padding: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.gif-item:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.gif-item img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+}
+
+/* Footer */
+footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background-color: #e0d8c2;
+  flex-wrap: wrap;
+}
+
+footer a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+footer .footer-right img {
+  width: 28px;
+  height: 28px;
+  margin-left: 10px;
+}
+
+@media (max-width: 900px) {
+  .gif-gallery {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 2em;
+  }
+  .gif-gallery {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  footer {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .footer-right img {
+    margin-left: 6px;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Rialo GIFs</h1>
+</header>
+
+<div class="gif-gallery">
+  <div class="gif-item">
+    <a href="images/gifs/1.gif" class="glightbox" data-glightbox="title: GIF 1">
+      <img src="images/gifs/1.gif" alt="GIF 1">
+    </a>
+  </div>
+  <div class="gif-item">
+    <a href="images/gifs/2.gif" class="glightbox" data-glightbox="title: GIF 2">
+      <img src="images/gifs/2.gif" alt="GIF 2">
+    </a>
+  </div>
+  <div class="gif-item">
+    <a href="images/gifs/3.gif" class="glightbox" data-glightbox="title: GIF 3">
+      <img src="images/gifs/3.gif" alt="GIF 3">
+    </a>
+  </div>
+  <div class="gif-item">
+    <a href="images/gifs/4.gif" class="glightbox" data-glightbox="title: GIF 4">
+      <img src="images/gifs/4.gif" alt="GIF 4">
+    </a>
+  </div>
+  <div class="gif-item">
+    <a href="images/gifs/5.gif" class="glightbox" data-glightbox="title: GIF 5">
+      <img src="images/gifs/5.gif" alt="GIF 5">
+    </a>
+  </div>
+  <!-- Tambah GIF baru: copy <div class="gif-item"> ... </div> -->
+</div>
+
+<footer>
+  <div class="footer-left">
+    <a href="https://rialo.io/" target="_blank">Visit Rialo</a>
+  </div>
+  <div class="footer-center">
+    created by <a href="https://x.com/Rey_8899" target="_blank">rey88</a>
+  </div>
+  <div class="footer-right">
+    <a href="https://x.com/RialoHQ" target="_blank"><img src="images/x-logo.png" alt="X Logo"></a>
+    <a href="https://discord.gg/rialoprotocol" target="_blank"><img src="images/discord-logo.png" alt="Discord Logo"></a>
+  </div>
+</footer>
+
+<!-- GLightbox JS -->
+<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+<script>
+const lightbox = GLightbox({ selector: '.glightbox' });
+</script>
+
+</body>
+</html>
