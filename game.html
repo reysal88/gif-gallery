@@ -84,10 +84,17 @@ document.addEventListener('keyup', e => {
   if(e.key === 'ArrowLeft' || e.key === 'ArrowRight') ship.dx = 0;
 });
 
-// Touch controls
+// Touch controls for moving
 canvas.addEventListener('touchstart', e => {
   touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
   isTouching = true;
+
+  // Tap pesawat to shoot
+  const touchY = e.touches[0].clientY - canvas.getBoundingClientRect().top;
+  if(touchX >= ship.x && touchX <= ship.x + ship.width &&
+     touchY >= ship.y && touchY <= ship.y + ship.height) {
+       shootLaser();
+  }
 });
 
 canvas.addEventListener('touchmove', e => {
@@ -96,6 +103,18 @@ canvas.addEventListener('touchmove', e => {
 
 canvas.addEventListener('touchend', e => {
   isTouching = false;
+});
+
+// Click to shoot (desktop)
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const clickY = e.clientY - rect.top;
+
+  if(clickX >= ship.x && clickX <= ship.x + ship.width &&
+     clickY >= ship.y && clickY <= ship.y + ship.height) {
+       shootLaser();
+  }
 });
 
 // ===== Functions =====
@@ -186,6 +205,7 @@ function loop() {
   if(!gameOver) requestAnimationFrame(loop);
 }
 
+// Spawn monsters
 spawnMonster();
 setInterval(spawnMonster, spawnInterval);
 loop();
@@ -197,9 +217,4 @@ document.getElementById('restartBtn').addEventListener('click', () => {
   score = 0;
   ship.x = canvas.width/2 - ship.width/2;
   gameOver = false;
-  document.getElementById('restartBtn').style.display = 'none';
-  loop();
-});
-</script>
-</body>
-</html>
+  document.getElementById('restartBtn').style.display
