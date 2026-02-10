@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rialo Fun</title>
 <style>
-  /* Pastikan body selalu minimal tinggi 100vh supaya footer di bawah */
+  /* ===== CSS LAMA ===== */
   body {
     background-color: #f5f0e6;
     font-family: Arial, sans-serif;
@@ -18,16 +18,16 @@
   }
 
   main {
-    flex: 1; /* isi halaman mengambil sisa space supaya footer tetap bawah */
+    flex: 1;
   }
 
-  /* Judul blinking */
   header h1 {
     margin: 20px 0;
     font-size: 2em;
     font-weight: bold;
     animation: blink 1s infinite alternate;
   }
+
   @keyframes blink {
     0%   { color: #000; }
     25%  { color: #ff0; }
@@ -36,19 +36,18 @@
     100% { color: #000; }
   }
 
-  /* Menu logo */
   .menu {
     display: flex;
     justify-content: center;
-    gap: 20px; /* jarak antar logo */
+    gap: 20px;
     margin-top: 40px;
-    flex-wrap: wrap; /* responsive HP */
+    flex-wrap: wrap;
   }
 
   .menu img {
-    width: 15vw;        /* fleksibel terhadap layar */
-    max-width: 150px;   /* maksimal 150px di desktop */
-    min-width: 100px;   /* minimal 100px di HP */
+    width: 15vw;
+    max-width: 150px;
+    min-width: 100px;
     height: auto;
     cursor: pointer;
     transition: transform 0.2s;
@@ -58,7 +57,6 @@
     transform: scale(1.1);
   }
 
-  /* Footer */
   footer {
     background-color: #e0d8c2;
     padding: 10px 20px;
@@ -94,19 +92,28 @@
     .footer-right img {
       margin-left: 5px;
     }
-.typing-text {
-  font-size: 2em;              
-  font-weight: bold;
-  color: #333;
-  margin: 30px auto 0 auto;   /* auto kiri & kanan supaya di tengah */
-  white-space: nowrap;          
-  overflow: hidden;             
-  border-right: 4px solid #333;
-  width: 0;                     
-  animation: typing 5s steps(16, end) forwards, blink-cursor 0.7s step-end infinite;
-  text-align: center;          /* tambahan supaya teks di tengah */
-}
-}
+  }
+  /* ===== CSS LAMA SELESAI ===== */
+
+  /* ===== CSS EFEK TYPING ===== */
+  .typing-text {
+    font-size: 2em;              
+    font-weight: bold;
+    color: #333;
+    margin: 30px auto 0 auto;  /* horizontal di tengah */
+    white-space: nowrap;          
+    overflow: hidden;             
+    border-right: none;           /* hilangkan kursor | */
+    width: 0;                     
+    animation: typing 5s steps(16, end) forwards; /* lambat 5 detik */
+    text-align: center;
+  }
+
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 16ch; } /* panjang teks "Rialo Fun Zone" */
+  }
+  /* ===== SELESAI CSS EFEK TYPING ===== */
 </style>
 </head>
 <body>
@@ -122,10 +129,11 @@
     <a href="game.html"><img src="images/game-logo.png" alt="Fun Game"></a>
     <a href="gif.html"><img src="images/gif.png" alt="Fun GIF"></a>
   </div>
+
+  <!-- Tulisan Rialo Fun Zone dengan efek diketik -->
   <h2 class="typing-text">Rialo Fun Zone</h2>
 </main>
 
-<!-- Footer -->
 <footer>
   <div class="footer-left">
     <a href="https://rialo.io/" target="_blank">Visit Rialo</a>
