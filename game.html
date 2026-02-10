@@ -1,91 +1,238 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Catch The Oracle</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rialo Game - HP Touch</title>
 <style>
-body { margin:0; overflow:hidden; background:black; }
-canvas { display:block; margin:auto; background:black; }
-#menu { position:absolute; top:40%; width:100%; text-align:center; color:white; font-size:32px; }
-#playBtn { font-size:20px; padding:10px 20px; margin-left:10px; cursor:pointer; }
-#credit { position:absolute; bottom:10px; width:100%; text-align:center; color:white; }
+body { margin:0; padding:0; background:#000; font-family:Arial; color:#fff; text-align:center; overflow:hidden; }
+#menu { position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; flex-direction:column; }
+#menu img { width:80%; max-width:400px; height:auto; margin-bottom:10px; }
+#menu button { font-size:16px; padding:5px 10px; cursor:pointer; margin-top:10px; }
+canvas { display:block; margin:0 auto; background:#000; touch-action:none; }
+#grialo { position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; font-size:40px; color:white; display:none;
+          text-shadow: 0 0 5px #fff, 0 0 10px #ff0, 0 0 20px #f0f, 0 0 30px #0ff;
+          animation: glow 1s infinite alternate; }
+@keyframes glow {
+  from { text-shadow: 0 0 5px #fff, 0 0 10px #ff0, 0 0 20px #f0f, 0 0 30px #0ff; }
+  to { text-shadow: 0 0 15px #fff, 0 0 30px #ff0, 0 0 50px #f0f, 0 0 80px #0ff; }
+}
+#gameOverText { position:absolute; width:100%; top:40%; text-align:center; font-size:36px; color:red; display:none; }
+#restartBtn, #backBtn { margin-top:10px; padding:10px 20px; font-size:16px; display:none; cursor:pointer; }
+#by { margin-top:10px; font-size:14px; }
 </style>
 </head>
 <body>
+
 <div id="menu">
-<img src="images/title.png" width="300"><br>
-<button id="playBtn">Play</button>
+  <!-- Judul game pakai gambar -->
+  <img src="images/title.png" id="gameTitle" alt="Catch The Oracle">
+  <!-- Tombol Play -->
+  <button id="playBtn">Play</button>
 </div>
-<div id="credit">by rey88</div>
-<canvas id="gameCanvas" width="400" height="600"></canvas>
+
+<div id="grialo">grialo</div>
+
+<canvas id="gameCanvas" width="400" height="600" style="display:none;"></canvas>
+<div id="gameOverText">GAME OVER</div>
+<button id="backBtn">Back</button>
+<button id="restartBtn">Restart Game</button>
+<div id="by">by rey88</div>
+
 <script>
+const menu = document.getElementById('menu');
+const playBtn = document.getElementById('playBtn');
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const menu = document.getElementById('menu');let gameRunning=false; let score=0;
+const grialoDiv = document.getElementById('grialo');
+const restartBtn = document.getElementById('restartBtn');
+const backBtn = document.getElementById('backBtn');
+const gameOverText = document.getElementById('gameOverText');
 
-let player = { x:180, y:520, w:60, h:60 }; let monsters=[]; let bullets=[]; let planets=[];
+let gameOver = false;
+let score = 0;
+let bestScore = localStorage.getItem('bestScore') || 0;
 
-const shipImg = new Image(); shipImg.src='images/ship.png'; const monsterImg = new Image(); monsterImg.src='images/monster.png';
+// Ship
+const ship = { x: 150, y: 500, width: 100, height: 100 };
+const shipImg = new Image();
+shipImg.src = 'images/pesawat-logo.png';
 
-// create moving planets for(let i=0;i<5;i++){ planets.push({ x:Math.random()*400, y:Math.random()*600, r:20+Math.random()*30, speed:0.2+Math.random()*0.5 }); }
+// Laser
+const lasers = [];
+const laserSpeed = 7;
 
-function spawnMonster(){ monsters.push({ x:Math.random()*360, y:-60, w:50, h:50, speed:1+Math.random()*1 }); } setInterval(()=>{ if(gameRunning && monsters.length<3) spawnMonster(); },1200);
+// Monster
+const monsters = [];
+let monsterSize = 80;
+let monsterSpeed = 2;
+let spawnDelay = 1500;
+let spawnTimer = 0;
+const monsterImg = new Image();
+monsterImg.src = 'images/monster-logo.png';
 
-function shoot(){ bullets.push({ x:player.x+25, y:player.y, speed:6 }); }
+// Explosions
+const explosions = [];
 
-canvas.addEventListener('touchmove', e=>{ let rect=canvas.getBoundingClientRect(); player.x = e.touches[0].clientX - rect.left - 30; });
+// Stars & planets background
+const stars = [];
+for(let i=0;i<100;i++){ stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*2+1 }); }
+const planets = [];
+for(let i=0;i<5;i++){ planets.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size:30+Math.random()*40, dx:(Math.random()*0.5+0.2) }); }
 
-canvas.addEventListener('click', shoot);
-
-function update(){ ctx.clearRect(0,0,400,600);
-
-// moving planets background
-planets.forEach(p=>{
-    p.y += p.speed;
-    if(p.y>620){ p.y=-40; p.x=Math.random()*400; }
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle='rgba(120,120,255,0.4)';
-    ctx.fill();
-});
-
-ctx.drawImage(shipImg,player.x,player.y,player.w,player.h);
-
-bullets.forEach((b,i)=>{
-    b.y -= b.speed;
-    ctx.fillStyle='yellow';
-    ctx.fillRect(b.x,b.y,4,10);
-    if(b.y<0) bullets.splice(i,1);
-});
-
-monsters.forEach((m,mi)=>{
-    m.y += m.speed;
-    ctx.drawImage(monsterImg,m.x,m.y,m.w,m.h);
-
-    if(m.y>600){ monsters.splice(mi,1); }
-
-    bullets.forEach((b,bi)=>{
-        if(b.x>m.x && b.x<m.x+m.w && b.y>m.y && b.y<m.y+m.h){
-            monsters.splice(mi,1);
-            bullets.splice(bi,1);
-            score++;
-        }
-    });
-
-    if(player.x < m.x+m.w && player.x+player.w > m.x && player.y < m.y+m.h && player.y+player.h > m.y){
-        gameRunning=false;
-        alert('Game Over');
-        menu.style.display='block';
-    }
-});
-
-ctx.fillStyle='white';
-ctx.fillText('Score: '+score,150,30);
-
-if(gameRunning) requestAnimationFrame(update);
-
+function drawStars(){
+  ctx.fillStyle='white'; 
+  stars.forEach(s=>{
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill(); 
+    s.y+=1; if(s.y>canvas.height)s.y=0;
+  });
+  planets.forEach(p=>{
+    ctx.fillStyle='rgba(100,150,255,0.6)'; 
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill(); 
+    p.x += p.dx; if(p.x>canvas.width)p.x=-p.size;
+  });
 }
 
-document.getElementById('playBtn').onclick=function(){ score=0; monsters=[]; bullets=[]; menu.style.display='none'; gameRunning=true; update(); } </script>
+// Monster spawn wave zig-zag
+function spawnMonstersWave(){ 
+  let numMonsters = 2 + Math.floor(score/1000);
+  if(numMonsters>5) numMonsters=5;
+  for(let i=0;i<numMonsters;i++){ 
+    const x = Math.random()*(canvas.width-monsterSize);
+    const direction = Math.random() < 0.5 ? -1 : 1;
+    monsters.push({ x:x, y:-monsterSize, width:monsterSize, height:monsterSize, dx:direction*1.5 });
+  } 
+}
+
+// Touch control
+let touchX = null; let dragging=false;
+canvas.addEventListener('touchstart', e=>{ const rect=canvas.getBoundingClientRect(); touchX=e.touches[0].clientX-rect.left; const touchY=e.touches[0].clientY-rect.top; dragging=(touchX>=ship.x && touchX<=ship.x+ship.width && touchY>=ship.y && touchY<=ship.y+ship.height); if(dragging) shootLaser(); });
+canvas.addEventListener('touchmove', e=>{ if(dragging){ const rect=canvas.getBoundingClientRect(); touchX=e.touches[0].clientX-rect.left; ship.x=touchX-ship.width/2; if(ship.x<0)ship.x=0; if(ship.x+ship.width>canvas.width)ship.x=canvas.width-ship.width; }});
+canvas.addEventListener('touchend', e=>{ dragging=false; });
+
+// Shoot
+function shootLaser(){ lasers.push({ x: ship.x + ship.width/2 - 2.5, y: ship.y, width:5, height:20 }); }
+
+// Update
+function update(){
+  if(gameOver) return;
+  drawStars();
+
+  spawnTimer+=16;
+  if(spawnTimer>=spawnDelay){ spawnMonstersWave(); spawnTimer=0; }
+
+  for(let i=lasers.length-1;i>=0;i--){ lasers[i].y-=laserSpeed; if(lasers[i].y+lasers[i].height<0) lasers.splice(i,1); }
+
+  for(let i=monsters.length-1;i>=0;i--){
+    monsters[i].y += monsterSpeed;
+    monsters[i].x += monsters[i].dx;
+    if(monsters[i].x < 0 || monsters[i].x + monsters[i].width > canvas.width) monsters[i].dx*=-1;
+
+    if(ship.x < monsters[i].x + monsters[i].width && ship.x + ship.width > monsters[i].x &&
+       ship.y < monsters[i].y + monsters[i].height && ship.y + ship.height > monsters[i].y){
+      gameOver=true; 
+      gameOverText.style.display='block'; 
+      restartBtn.style.display='inline-block';
+      backBtn.style.display='inline-block';
+      if(score > bestScore){
+        bestScore = score;
+        localStorage.setItem('bestScore', bestScore);
+      }
+    }
+
+    for(let j=lasers.length-1;j>=0;j--){
+      if(lasers[j].x < monsters[i].x + monsters[i].width && lasers[j].x + lasers[j].width > monsters[i].x &&
+         lasers[j].y < monsters[i].y + monsters[i].height && lasers[j].y + lasers[j].height > monsters[i].y){
+        explosions.push({ x: monsters[i].x+monsterSize/2, y: monsters[i].y+monsterSize/2, radius: 0, maxRadius: 40 });
+        monsters.splice(i,1); lasers.splice(j,1); score+=10; 
+        break;
+      }
+    }
+
+    if(monsters[i] && monsters[i].y>canvas.height) monsters.splice(i,1);
+  }
+
+  explosions.forEach((ex,i)=>{
+    ex.radius += 2;
+    if(ex.radius >= ex.maxRadius) explosions.splice(i,1);
+  });
+}
+
+// Draw
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawStars();
+  ctx.drawImage(shipImg, ship.x, ship.y, ship.width, ship.height);
+  
+  lasers.forEach(l=>{
+    ctx.fillStyle='red';
+    ctx.shadowColor='red';
+    ctx.shadowBlur=10;
+    ctx.fillRect(l.x,l.y,l.width,l.height);
+    ctx.shadowBlur=0;
+  });
+
+  monsters.forEach(m=>{
+    ctx.drawImage(monsterImg,m.x,m.y,m.width,m.height);
+    ctx.fillStyle='yellow';
+    ctx.font='14px Arial';
+    ctx.textAlign='center';
+    ctx.fillText('Oracle', m.x+m.width/2, m.y-5);
+  });
+
+  explosions.forEach(ex=>{
+    let gradient = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, ex.radius);
+    gradient.addColorStop(0,'yellow');
+    gradient.addColorStop(0.5,'orange');
+    gradient.addColorStop(1,'red');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(ex.x, ex.y, ex.radius, 0, Math.PI*2);
+    ctx.fill();
+  });
+
+  ctx.fillStyle='#fff';
+  ctx.font='20px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('Score: '+score, canvas.width/2, 30);
+  ctx.font='16px Arial';
+  ctx.fillText('Best: '+bestScore, canvas.width/2, 55);
+}
+
+// Game loop start after Play click
+let gameLoopStarted = false;
+function loop(){ update(); draw(); requestAnimationFrame(loop); }
+
+// Play button -> splash grialo, then start game
+playBtn.addEventListener('click', ()=>{
+  menu.style.display='none';
+  grialoDiv.style.display='flex';
+  setTimeout(()=>{
+    grialoDiv.style.display='none';
+    canvas.style.display='block';
+    if(!gameLoopStarted){
+      gameLoopStarted=true;
+      loop();
+    }
+  },2000);
+});
+
+// Restart
+restartBtn.addEventListener('click', ()=>{
+  monsters.length=0; lasers.length=0; score=0; gameOver=false;
+  ship.x = canvas.width/2 - ship.width/2;
+  monsterSpeed = 2;
+  spawnDelay = 1500;
+  gameOverText.style.display='none';
+  restartBtn.style.display='none';
+  backBtn.style.display='none';
+});
+
+// Back to main page
+backBtn.addEventListener('click', ()=>{
+  window.location.href = 'index.html';
+});
+</script>
 
 </body>
 </html>
