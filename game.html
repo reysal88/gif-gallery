@@ -6,22 +6,27 @@
 <title>Rialo Game - HP Touch</title>
 <style>
   body { margin:0; padding:0; background:#000; font-family:Arial; color:#fff; text-align:center; }
-  #menu { display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:row; gap:10px; }
-  #menu h1 { font-size: 28px; margin:0; }
-  #menu button { font-size: 16px; padding:5px 10px; cursor:pointer; }
+  #splash, #menu { position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; flex-direction:column; color:#fff; }
+  #splash { font-size:40px; display:flex; }
+  #menu h1 { font-size:28px; margin:0; }
+  #menu button { font-size:16px; padding:5px 10px; cursor:pointer; margin-top:10px; }
   canvas { display:block; margin:0 auto; background:#000; touch-action: none; }
   #restartBtn { margin-top:10px; padding:10px 20px; font-size:16px; display:none; cursor:pointer; }
-  #by { margin-top:30px; font-size:14px; }
+  #by { margin-top:10px; font-size:14px; }
+  #gameOverText { position:absolute; width:100%; top:40%; text-align:center; font-size:36px; color:red; display:none; }
 </style>
 </head>
 <body>
 
-<div id="menu">
+<div id="splash">grialo</div>
+
+<div id="menu" style="display:none;">
   <h1>CATCH THE ORACLE</h1>
   <button id="playBtn">Play</button>
 </div>
 
 <canvas id="gameCanvas" width="400" height="600" style="display:none;"></canvas>
+<div id="gameOverText">GAME OVER</div>
 <button id="restartBtn">Restart Game</button>
 <div id="by">by rey88</div>
 
@@ -30,21 +35,32 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Menu
+// Elements
+const splash = document.getElementById('splash');
 const menu = document.getElementById('menu');
 const playBtn = document.getElementById('playBtn');
+const restartBtn = document.getElementById('restartBtn');
+const byText = document.getElementById('by');
+const gameOverText = document.getElementById('gameOverText');
+
+// Show menu after splash
+setTimeout(()=>{
+  splash.style.display='none';
+  menu.style.display='flex';
+},2000); // 2 detik splash
+
 playBtn.addEventListener('click', ()=>{
   menu.style.display='none';
   canvas.style.display='block';
 });
 
 // Restart
-const restartBtn = document.getElementById('restartBtn');
 restartBtn.addEventListener('click', ()=>{
   monsters.length=0; lasers.length=0; score=0; gameOver=false;
   ship.x = canvas.width/2 - ship.width/2;
   monsterSpeed = 2;
   spawnDelay = 1500;
+  gameOverText.style.display='none';
   restartBtn.style.display='none';
 });
 
@@ -70,13 +86,12 @@ let spawnTimer = 0;
 const monsterImg = new Image();
 monsterImg.src = 'images/monster-logo.png';
 
-// Stars for dynamic background
+// Stars for background
 const stars = [];
 for(let i=0;i<100;i++){
   stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*2+1 });
 }
 
-// Draw stars
 function drawStars(){
   ctx.fillStyle = 'white';
   stars.forEach(s=>{
@@ -90,7 +105,7 @@ function drawStars(){
 
 // Monster spawn wave
 function spawnMonstersWave(){
-  const numMonsters = Math.min(3 + Math.floor(score/100), 6); // 3-6 monster per wave
+  const numMonsters = Math.min(3 + Math.floor(score/100), 6);
   for(let i=0;i<numMonsters;i++){
     const x = Math.random()*(canvas.width-monsterSize);
     monsters.push({ x:x, y:-monsterSize, width:monsterSize, height:monsterSize });
@@ -121,17 +136,17 @@ canvas.addEventListener('touchmove', e=>{
 
 canvas.addEventListener('touchend', e=>{ dragging=false; });
 
-// Shoot function
+// Shoot
 function shootLaser(){ lasers.push({ x: ship.x + ship.width/2 - 2.5, y: ship.y, width:5, height:20 }); }
 
 // Update game
 function update(){
   if(gameOver) return;
 
-  // Update stars
+  // Stars
   drawStars();
 
-  // Spawn monsters timer
+  // Spawn monsters
   spawnTimer += 16;
   if(spawnTimer >= spawnDelay){
     spawnMonstersWave();
@@ -144,13 +159,13 @@ function update(){
     spawnDelay = Math.max(500, spawnDelay - 100);
   }
 
-  // Update lasers
+  // Lasers
   for(let i=lasers.length-1;i>=0;i--){
     lasers[i].y -= laserSpeed;
     if(lasers[i].y+lasers[i].height<0) lasers.splice(i,1);
   }
 
-  // Update monsters
+  // Monsters
   for(let i=monsters.length-1;i>=0;i--){
     monsters[i].y += monsterSpeed;
 
@@ -160,6 +175,7 @@ function update(){
        ship.y < monsters[i].y + monsters[i].height &&
        ship.y + ship.height > monsters[i].y){
          gameOver = true;
+         gameOverText.style.display='block';
          restartBtn.style.display='inline-block';
     }
 
@@ -181,21 +197,20 @@ function update(){
   }
 }
 
-// Draw everything
+// Draw
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // Draw stars first
   drawStars();
 
-  // Draw ship
+  // Ship
   ctx.drawImage(shipImg, ship.x, ship.y, ship.width, ship.height);
 
-  // Draw lasers
+  // Lasers
   ctx.fillStyle='red';
   lasers.forEach(l=>ctx.fillRect(l.x,l.y,l.width,l.height));
 
-  // Draw monsters
+  // Monsters
   monsters.forEach(m=>{
     ctx.drawImage(monsterImg, m.x, m.y, m.width, m.height);
     ctx.fillStyle='yellow';
@@ -204,14 +219,14 @@ function draw(){
     ctx.fillText('Oracle', m.x+m.width/2, m.y-5);
   });
 
-  // Draw score in center top
+  // Score
   ctx.fillStyle='#fff';
   ctx.font='20px Arial';
   ctx.textAlign='center';
   ctx.fillText('Score: '+score, canvas.width/2, 30);
 }
 
-// Game loop
+// Loop
 function loop(){
   update();
   draw();
