@@ -18,7 +18,7 @@ canvas { display:block; margin:0 auto; background:#000; touch-action:none; }
   to { text-shadow: 0 0 15px #fff, 0 0 30px #ff0, 0 0 50px #f0f, 0 0 80px #0ff; }
 }
 #gameOverText { position:absolute; width:100%; top:40%; text-align:center; font-size:36px; color:red; display:none; }
-#restartBtn { margin-top:10px; padding:10px 20px; font-size:16px; display:none; cursor:pointer; }
+#restartBtn, #backBtn { margin-top:10px; padding:10px 20px; font-size:16px; display:none; cursor:pointer; }
 #by { margin-top:10px; font-size:14px; }
 </style>
 </head>
@@ -33,6 +33,7 @@ canvas { display:block; margin:0 auto; background:#000; touch-action:none; }
 
 <canvas id="gameCanvas" width="400" height="600" style="display:none;"></canvas>
 <div id="gameOverText">GAME OVER</div>
+<button id="backBtn">Back</button>
 <button id="restartBtn">Restart Game</button>
 <div id="by">by rey88</div>
 
@@ -43,6 +44,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const grialoDiv = document.getElementById('grialo');
 const restartBtn = document.getElementById('restartBtn');
+const backBtn = document.getElementById('backBtn');
 const gameOverText = document.getElementById('gameOverText');
 
 let gameOver = false;
@@ -70,18 +72,32 @@ monsterImg.src = 'images/monster-logo.png';
 // Explosions
 const explosions = [];
 
-// Stars
+// Stars & planets background
 const stars = [];
 for(let i=0;i<100;i++){ stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*2+1 }); }
-function drawStars(){ ctx.fillStyle='white'; stars.forEach(s=>{ ctx.beginPath(); ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill(); s.y+=1; if(s.y>canvas.height)s.y=0; }); }
+const planets = [];
+for(let i=0;i<5;i++){ planets.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size:30+Math.random()*40, dx:(Math.random()*0.5+0.2) }); }
+
+function drawStars(){
+  ctx.fillStyle='white'; 
+  stars.forEach(s=>{
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill(); 
+    s.y+=1; if(s.y>canvas.height)s.y=0;
+  });
+  planets.forEach(p=>{
+    ctx.fillStyle='rgba(100,150,255,0.6)'; 
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill(); 
+    p.x += p.dx; if(p.x>canvas.width)p.x=-p.size;
+  });
+}
 
 // Monster spawn wave dengan zig-zag
 function spawnMonstersWave(){ 
-  let maxMonsters = 3 + Math.floor(score/1000);
-  if(maxMonsters>5) maxMonsters=5;
-  for(let i=0;i<maxMonsters;i++){ 
+  let numMonsters = 2 + Math.floor(score/1000);
+  if(numMonsters>5) numMonsters=5;
+  for(let i=0;i<numMonsters;i++){ 
     const x = Math.random()*(canvas.width-monsterSize);
-    const direction = Math.random() < 0.5 ? -1 : 1; // zig zag direction
+    const direction = Math.random() < 0.5 ? -1 : 1; // zig zag
     monsters.push({ x:x, y:-monsterSize, width:monsterSize, height:monsterSize, dx:direction*1.5 });
   } 
 }
@@ -107,7 +123,7 @@ function update(){
 
   for(let i=monsters.length-1;i>=0;i--){
     monsters[i].y += monsterSpeed;
-    monsters[i].x += monsters[i].dx; // zig zag
+    monsters[i].x += monsters[i].dx; // zig-zag
     if(monsters[i].x < 0 || monsters[i].x + monsters[i].width > canvas.width) monsters[i].dx*=-1;
 
     // Collision with ship
@@ -116,11 +132,11 @@ function update(){
       gameOver=true; 
       gameOverText.style.display='block'; 
       restartBtn.style.display='inline-block';
+      backBtn.style.display='inline-block';
       // Check best score
       if(score > bestScore){
         bestScore = score;
         localStorage.setItem('bestScore', bestScore);
-        alert('New High Score! 🎉 '+bestScore);
       }
     }
 
@@ -208,6 +224,12 @@ restartBtn.addEventListener('click', ()=>{
   spawnDelay = 1500;
   gameOverText.style.display='none';
   restartBtn.style.display='none';
+  backBtn.style.display='none';
+});
+
+// Back to main page
+backBtn.addEventListener('click', ()=>{
+  window.location.href = 'index.html'; // ganti sesuai halaman utama
 });
 </script>
 
