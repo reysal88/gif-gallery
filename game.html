@@ -5,26 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rialo Game - PC Version</title>
 <style>
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: #000;
-    font-family: Arial, sans-serif;
-    color: #fff;
-    text-align: center;
-  }
-  canvas {
-    display: block;
-    margin: 0 auto;
-    background-color: #000;
-  }
-  #restartBtn {
-    margin-top: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    display: none;
-    cursor: pointer;
-  }
+  body { margin:0; padding:0; background:#000; font-family:Arial; color:#fff; text-align:center; }
+  canvas { display:block; margin:0 auto; background:#000; }
+  #restartBtn { margin-top:10px; padding:10px 20px; font-size:16px; display:none; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -34,14 +17,18 @@
 <button id="restartBtn">Restart Game</button>
 
 <script>
+// Canvas
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Game variables
 let gameOver = false;
 let score = 0;
 
-// Pesawat
+// Ship
 const ship = { x: 175, y: 540, width: 50, height: 50, dx: 0, speed: 5 };
+const shipImg = new Image();
+shipImg.src = 'images/pesawat-logo.png'; // ubah sesuai folder
 
 // Laser
 const lasers = [];
@@ -51,96 +38,96 @@ const laserSpeed = 7;
 const monsters = [];
 const monsterSize = 40;
 const monsterSpeed = 2;
+const monsterImg = new Image();
+monsterImg.src = 'images/monster-logo.png'; // ubah sesuai folder
 
 // Keyboard controls
 document.addEventListener('keydown', e => {
-  if(e.key === 'ArrowLeft') ship.dx = -ship.speed;
-  if(e.key === 'ArrowRight') ship.dx = ship.speed;
-  if(e.key === ' ') shootLaser();
+  if(e.key==='ArrowLeft') ship.dx=-ship.speed;
+  if(e.key==='ArrowRight') ship.dx=ship.speed;
+  if(e.key===' ') shootLaser();
 });
 document.addEventListener('keyup', e => {
-  if(e.key === 'ArrowLeft' || e.key === 'ArrowRight') ship.dx = 0;
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight') ship.dx=0;
 });
 
-function shootLaser() {
+// Functions
+function shootLaser(){
   lasers.push({ x: ship.x + ship.width/2 - 2.5, y: ship.y, width: 5, height: 20 });
 }
-
-function spawnMonster() {
-  const x = Math.random() * (canvas.width - monsterSize);
-  monsters.push({ x: x, y: -monsterSize, width: monsterSize, height: monsterSize });
+function spawnMonster(){
+  const x = Math.random()*(canvas.width-monsterSize);
+  monsters.push({ x:x, y:-monsterSize, width:monsterSize, height:monsterSize });
 }
 
-function update() {
+function update(){
   if(gameOver) return;
 
   // Update ship
   ship.x += ship.dx;
-  if(ship.x < 0) ship.x = 0;
-  if(ship.x + ship.width > canvas.width) ship.x = canvas.width - ship.width;
+  if(ship.x<0) ship.x=0;
+  if(ship.x+ship.width>canvas.width) ship.x=canvas.width-ship.width;
 
   // Update lasers
-  for(let i = lasers.length-1; i>=0; i--){
+  for(let i=lasers.length-1;i>=0;i--){
     lasers[i].y -= laserSpeed;
-    if(lasers[i].y + lasers[i].height < 0) lasers.splice(i,1);
+    if(lasers[i].y+lasers[i].height<0) lasers.splice(i,1);
   }
 
   // Update monsters
-  for(let i = monsters.length-1; i>=0; i--){
+  for(let i=monsters.length-1;i>=0;i--){
     monsters[i].y += monsterSpeed;
 
     // Collision with ship
-    if(ship.x < monsters[i].x + monsters[i].width &&
-       ship.x + ship.width > monsters[i].x &&
-       ship.y < monsters[i].y + monsters[i].height &&
-       ship.y + ship.height > monsters[i].y) {
+    if(ship.x<monsters[i].x+monsters[i].width &&
+       ship.x+ship.width>monsters[i].x &&
+       ship.y<monsters[i].y+monsters[i].height &&
+       ship.y+ship.height>monsters[i].y){
          gameOver = true;
-         document.getElementById('restartBtn').style.display = 'inline-block';
+         document.getElementById('restartBtn').style.display='inline-block';
     }
 
     // Collision with lasers
-    for(let j=lasers.length-1; j>=0; j--){
-      if(lasers[j].x < monsters[i].x + monsters[i].width &&
-         lasers[j].x + lasers[j].width > monsters[i].x &&
-         lasers[j].y < monsters[i].y + monsters[i].height &&
-         lasers[j].y + lasers[j].height > monsters[i].y) {
+    for(let j=lasers.length-1;j>=0;j--){
+      if(lasers[j].x<monsters[i].x+monsters[i].width &&
+         lasers[j].x+lasers[j].width>monsters[i].x &&
+         lasers[j].y<monsters[i].y+monsters[i].height &&
+         lasers[j].y+lasers[j].height>monsters[i].y){
            monsters.splice(i,1);
            lasers.splice(j,1);
-           score += 10;
+           score+=10;
            break;
       }
     }
 
-    // Remove monsters off screen
-    if(monsters[i] && monsters[i].y > canvas.height) monsters.splice(i,1);
+    // Remove off-screen
+    if(monsters[i] && monsters[i].y>canvas.height) monsters.splice(i,1);
   }
 }
 
-function draw() {
+function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // Ship
-  ctx.fillStyle = 'cyan';
-  ctx.fillRect(ship.x, ship.y, ship.width, ship.height);
+  // Draw ship
+  ctx.drawImage(shipImg, ship.x, ship.y, ship.width, ship.height);
 
-  // Lasers
-  ctx.fillStyle = 'red';
-  lasers.forEach(l => ctx.fillRect(l.x, l.y, l.width, l.height));
+  // Draw lasers
+  ctx.fillStyle='red';
+  lasers.forEach(l=>ctx.fillRect(l.x,l.y,l.width,l.height));
 
-  // Monsters
-  monsters.forEach(m => {
-    ctx.fillStyle = 'purple';
-    ctx.fillRect(m.x, m.y, m.width, m.height);
-    ctx.fillStyle = 'yellow';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Oracle', m.x + m.width/2, m.y - 5);
+  // Draw monsters
+  monsters.forEach(m=>{
+    ctx.drawImage(monsterImg, m.x, m.y, m.width, m.height);
+    ctx.fillStyle='yellow';
+    ctx.font='14px Arial';
+    ctx.textAlign='center';
+    ctx.fillText('Oracle', m.x+m.width/2, m.y-5);
   });
 
-  // Score
-  ctx.fillStyle = '#fff';
-  ctx.font = '20px Arial';
-  ctx.fillText('Score: ' + score, 10, 30);
+  // Draw score
+  ctx.fillStyle='#fff';
+  ctx.font='20px Arial';
+  ctx.fillText('Score: '+score, 10, 30);
 }
 
 // Game loop
@@ -148,20 +135,17 @@ let spawnTimer = 0;
 function loop(){
   update();
   draw();
-  spawnTimer += 16;
-  if(spawnTimer > 2000){ spawnMonster(); spawnTimer = 0; }
+  spawnTimer+=16;
+  if(spawnTimer>2000){ spawnMonster(); spawnTimer=0; }
   requestAnimationFrame(loop);
 }
 loop();
 
-// Restart
+// Restart button
 document.getElementById('restartBtn').addEventListener('click', ()=>{
-  monsters.length = 0;
-  lasers.length = 0;
-  score = 0;
-  ship.x = 175;
-  gameOver = false;
-  document.getElementById('restartBtn').style.display = 'none';
+  monsters.length=0; lasers.length=0; score=0;
+  ship.x=175; gameOver=false;
+  document.getElementById('restartBtn').style.display='none';
 });
 </script>
 </body>
