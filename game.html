@@ -47,6 +47,7 @@ const gameOverText = document.getElementById('gameOverText');
 
 let gameOver = false;
 let score = 0;
+let bestScore = localStorage.getItem('bestScore') || 0;
 
 // Ship
 const ship = { x: 150, y: 500, width: 100, height: 100 };
@@ -74,12 +75,14 @@ const stars = [];
 for(let i=0;i<100;i++){ stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*2+1 }); }
 function drawStars(){ ctx.fillStyle='white'; stars.forEach(s=>{ ctx.beginPath(); ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill(); s.y+=1; if(s.y>canvas.height)s.y=0; }); }
 
-// Monster spawn wave (2–3 monster tiap wave)
+// Monster spawn wave dengan zig-zag
 function spawnMonstersWave(){ 
-  const numMonsters = 2 + Math.floor(Math.random()*2); // 2 atau 3 monster
-  for(let i=0;i<numMonsters;i++){ 
-    const x = Math.random()*(canvas.width-monsterSize); 
-    monsters.push({ x:x, y:-monsterSize, width:monsterSize, height:monsterSize }); 
+  let maxMonsters = 3 + Math.floor(score/1000);
+  if(maxMonsters>5) maxMonsters=5;
+  for(let i=0;i<maxMonsters;i++){ 
+    const x = Math.random()*(canvas.width-monsterSize);
+    const direction = Math.random() < 0.5 ? -1 : 1; // zig zag direction
+    monsters.push({ x:x, y:-monsterSize, width:monsterSize, height:monsterSize, dx:direction*1.5 });
   } 
 }
 
@@ -100,25 +103,37 @@ function update(){
   spawnTimer+=16;
   if(spawnTimer>=spawnDelay){ spawnMonstersWave(); spawnTimer=0; }
 
-  // Monster speed naik 5% tiap 500 poin
-  if(score>=500 && score % 500 === 0){ monsterSpeed *= 1.05; spawnDelay = Math.max(500, spawnDelay-10); }
-
   for(let i=lasers.length-1;i>=0;i--){ lasers[i].y-=laserSpeed; if(lasers[i].y+lasers[i].height<0) lasers.splice(i,1); }
 
   for(let i=monsters.length-1;i>=0;i--){
     monsters[i].y += monsterSpeed;
+    monsters[i].x += monsters[i].dx; // zig zag
+    if(monsters[i].x < 0 || monsters[i].x + monsters[i].width > canvas.width) monsters[i].dx*=-1;
+
     // Collision with ship
-    if(ship.x < monsters[i].x + monsters[i].width && ship.x + ship.width > monsters[i].x && ship.y < monsters[i].y + monsters[i].height && ship.y + ship.height > monsters[i].y){
-      gameOver=true; gameOverText.style.display='block'; restartBtn.style.display='inline-block';
+    if(ship.x < monsters[i].x + monsters[i].width && ship.x + ship.width > monsters[i].x &&
+       ship.y < monsters[i].y + monsters[i].height && ship.y + ship.height > monsters[i].y){
+      gameOver=true; 
+      gameOverText.style.display='block'; 
+      restartBtn.style.display='inline-block';
+      // Check best score
+      if(score > bestScore){
+        bestScore = score;
+        localStorage.setItem('bestScore', bestScore);
+        alert('New High Score! 🎉 '+bestScore);
+      }
     }
+
     // Collision with lasers
     for(let j=lasers.length-1;j>=0;j--){
       if(lasers[j].x < monsters[i].x + monsters[i].width && lasers[j].x + lasers[j].width > monsters[i].x &&
          lasers[j].y < monsters[i].y + monsters[i].height && lasers[j].y + lasers[j].height > monsters[i].y){
         explosions.push({ x: monsters[i].x+monsterSize/2, y: monsters[i].y+monsterSize/2, radius: 0, maxRadius: 40 });
-        monsters.splice(i,1); lasers.splice(j,1); score+=10; break;
+        monsters.splice(i,1); lasers.splice(j,1); score+=10; 
+        break;
       }
     }
+
     if(monsters[i] && monsters[i].y>canvas.height) monsters.splice(i,1);
   }
 
@@ -133,9 +148,8 @@ function update(){
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawStars();
-  // Ship
   ctx.drawImage(shipImg, ship.x, ship.y, ship.width, ship.height);
-  // Lasers glow
+  
   lasers.forEach(l=>{
     ctx.fillStyle='red';
     ctx.shadowColor='red';
@@ -143,7 +157,7 @@ function draw(){
     ctx.fillRect(l.x,l.y,l.width,l.height);
     ctx.shadowBlur=0;
   });
-  // Monsters
+
   monsters.forEach(m=>{
     ctx.drawImage(monsterImg,m.x,m.y,m.width,m.height);
     ctx.fillStyle='yellow';
@@ -151,7 +165,7 @@ function draw(){
     ctx.textAlign='center';
     ctx.fillText('Oracle', m.x+m.width/2, m.y-5);
   });
-  // Explosions
+
   explosions.forEach(ex=>{
     let gradient = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, ex.radius);
     gradient.addColorStop(0,'yellow');
@@ -162,11 +176,14 @@ function draw(){
     ctx.arc(ex.x, ex.y, ex.radius, 0, Math.PI*2);
     ctx.fill();
   });
-  // Score
+
+  // Score & Best Score
   ctx.fillStyle='#fff';
   ctx.font='20px Arial';
   ctx.textAlign='center';
   ctx.fillText('Score: '+score, canvas.width/2, 30);
+  ctx.font='16px Arial';
+  ctx.fillText('Best: '+bestScore, canvas.width/2, 55);
 }
 
 // Loop
