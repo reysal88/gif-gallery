@@ -1,263 +1,153 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catch The Oracle</title>
-
 <style>
-body{
-  margin:0;
-  background:#000;
-  overflow:hidden;
-  font-family:Arial, sans-serif;
-  text-align:center;
-  color:white;
-}
+body{margin:0;background:black;text-align:center;color:white;overflow:hidden}
 
 /* MENU */
 #menu{
-  position:absolute;
-  width:100%;
-  height:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
+position:absolute;width:100%;height:100%;
+display:flex;justify-content:center;align-items:center;
 }
 
 #playImage{
-  width:80%;
-  max-width:400px;
-  cursor:pointer;
-  animation:pulse 1.5s infinite;
-}
-
-@keyframes pulse{
-  0%{ transform:scale(1); }
-  50%{ transform:scale(1.05); }
-  100%{ transform:scale(1); }
+width:160px;
+cursor:pointer;
 }
 
 /* SPLASH */
 #grialo{
-  position:absolute;
-  width:100%;
-  height:100%;
-  display:none;
-  justify-content:center;
-  align-items:center;
-  font-size:42px;
-  text-shadow:0 0 10px #fff,0 0 30px #0ff;
-  animation:glow 1s infinite alternate;
+position:absolute;width:100%;height:100%;
+display:none;justify-content:center;align-items:center;
+font-size:40px;color:white;
+animation:blink 1s infinite alternate;
 }
+@keyframes blink{from{opacity:0.5}to{opacity:1}}
 
-@keyframes glow{
-  from{opacity:0.5}
-  to{opacity:1}
-}
-
-/* GAME */
-canvas{
-  display:none;
-  margin:0 auto;
-  touch-action:none;
-}
-
-#gameOver{
-  position:absolute;
-  top:35%;
-  width:100%;
-  font-size:36px;
-  color:red;
-  display:none;
-}
-
-button{
-  padding:10px 20px;
-  margin-top:10px;
-  font-size:16px;
-  display:none;
-}
-
-#by{
-  margin-top:10px;
-  font-size:14px;
-}
+canvas{display:none;margin:auto;background:black}
 </style>
 </head>
-
 <body>
 
-<!-- MENU -->
 <div id="menu">
-  <img src="images/title.png" id="playImage">
+<img src="images/title.png" id="playImage">
 </div>
 
-<!-- SPLASH -->
 <div id="grialo">grialo</div>
 
-<!-- GAME -->
 <canvas id="game" width="400" height="600"></canvas>
 
-<div id="gameOver">GAME OVER</div>
-<button id="backBtn">Back</button>
-<button id="restartBtn">Restart</button>
-<div id="by">by rey88</div>
-
 <script>
-const menu = document.getElementById('menu');
-const playImage = document.getElementById('playImage');
-const grialo = document.getElementById('grialo');
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const restartBtn = document.getElementById('restartBtn');
-const backBtn = document.getElementById('backBtn');
-const gameOverText = document.getElementById('gameOver');
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+const playImage=document.getElementById("playImage");
+const menu=document.getElementById("menu");
+const grialo=document.getElementById("grialo");
 
-let started = false;
-let gameOver = false;
-let score = 0;
-let best = localStorage.getItem("best") || 0;
+let gameStarted=false;
+let score=0;
+let best=localStorage.getItem("best")||0;
 
 /* SHIP */
-const ship = { x:150, y:500, w:100, h:100 };
-const shipImg = new Image();
-shipImg.src = "images/pesawat-logo.png";
+const ship={x:150,y:500,w:90,h:90};
+const shipImg=new Image();
+shipImg.src="images/pesawat-logo.png";
 
 /* MONSTER */
-const monsters = [];
-const monsterImg = new Image();
-monsterImg.src = "images/monster-logo.png";
+const monsters=[];
+const monsterImg=new Image();
+monsterImg.src="images/monster-logo.png";
 
 /* LASER */
-const lasers = [];
+const lasers=[];
 
-/* BACKGROUND */
-const stars = [];
-for(let i=0;i<100;i++)
-  stars.push({x:Math.random()*400,y:Math.random()*600,s:Math.random()*2});
-
-/* START GAME */
-playImage.onclick = ()=>{
-  menu.style.display="none";
-  grialo.style.display="flex";
-
-  setTimeout(()=>{
-    grialo.style.display="none";
-    canvas.style.display="block";
-    if(!started){
-      started=true;
-      loop();
-    }
-  },2000);
+/* PLAY CLICK */
+playImage.onclick=()=>{
+menu.style.display="none";
+grialo.style.display="flex";
+setTimeout(()=>{
+grialo.style.display="none";
+canvas.style.display="block";
+if(!gameStarted){gameStarted=true;loop();}
+},2000);
 };
 
-/* TOUCH */
-canvas.addEventListener("touchstart", e=>{
-  let r = canvas.getBoundingClientRect();
-  ship.x = e.touches[0].clientX - r.left - ship.w/2;
-  shoot();
-});
-
-/* SHOOT */
-function shoot(){
-  lasers.push({x:ship.x+ship.w/2-2,y:ship.y});
+/* DRAG CONTROL */
+let dragging=false;
+canvas.addEventListener("touchstart",()=>{dragging=true});
+canvas.addEventListener("touchmove",e=>{
+if(dragging){
+let r=canvas.getBoundingClientRect();
+ship.x=e.touches[0].clientX-r.left-ship.w/2;
 }
+});
+canvas.addEventListener("touchend",()=>{dragging=false});
+
+/* SHOOT AUTO */
+setInterval(()=>{lasers.push({x:ship.x+ship.w/2,y:ship.y});},500);
 
 /* SPAWN MONSTER */
 function spawn(){
-  let count = Math.min(2 + Math.floor(score/1000),5);
-  for(let i=0;i<count;i++){
-    monsters.push({
-      x:Math.random()*320,
-      y:-80,
-      dx:Math.random()<0.5?-1.5:1.5
-    });
-  }
+let count=Math.min(2+Math.floor(score/1000),5);
+if(monsters.length>=count) return;
+
+monsters.push({
+x:Math.random()*320,
+y:-80,
+dx:Math.random()<0.5?-1.5:1.5
+});
 }
 
 /* UPDATE */
 function update(){
-  if(gameOver) return;
+if(Math.random()<0.01) spawn();
 
-  if(Math.random()<0.02) spawn();
+lasers.forEach(l=>l.y-=6);
 
-  lasers.forEach(l=>l.y-=7);
-  monsters.forEach(m=>{
-    m.y+=2;
-    m.x+=m.dx;
-    if(m.x<0||m.x>320)m.dx*=-1;
-  });
+monsters.forEach((m,i)=>{
+m.y+=2;
+m.x+=m.dx;
+if(m.x<0||m.x>320)m.dx*=-1;
 
-  monsters.forEach((m,i)=>{
-    if(m.y>600) monsters.splice(i,1);
-    lasers.forEach((l,j)=>{
-      if(l.x>m.x && l.x<m.x+80 && l.y>m.y && l.y<m.y+80){
-        monsters.splice(i,1);
-        lasers.splice(j,1);
-        score+=10;
-        if(score>best){best=score;localStorage.setItem("best",best);}
-      }
-    });
-
-    if(ship.x<m.x+80 && ship.x+100>m.x && ship.y<m.y+80){
-      gameOver=true;
-      gameOverText.style.display="block";
-      restartBtn.style.display="inline-block";
-      backBtn.style.display="inline-block";
-    }
-  });
+lasers.forEach((l,j)=>{
+if(l.x>m.x&&l.x<m.x+80&&l.y>m.y&&l.y<m.y+80){
+monsters.splice(i,1);
+lasers.splice(j,1);
+score+=10;
+if(score>best){best=score;localStorage.setItem("best",best);}
+}
+});
+});
 }
 
 /* DRAW */
 function draw(){
-  ctx.clearRect(0,0,400,600);
+ctx.clearRect(0,0,400,600);
 
-  ctx.fillStyle="white";
-  stars.forEach(s=>{
-    ctx.fillRect(s.x,s.y,s.s,s.s);
-    s.y+=1;
-    if(s.y>600)s.y=0;
-  });
+ctx.drawImage(shipImg,ship.x,ship.y,ship.w,ship.h);
 
-  ctx.drawImage(shipImg,ship.x,ship.y,ship.w,ship.h);
+ctx.fillStyle="red";
+lasers.forEach(l=>ctx.fillRect(l.x,l.y,4,20));
 
-  ctx.fillStyle="red";
-  lasers.forEach(l=>ctx.fillRect(l.x,l.y,4,20));
+monsters.forEach(m=>{
+ctx.drawImage(monsterImg,m.x,m.y,80,80);
+});
 
-  monsters.forEach(m=>{
-    ctx.drawImage(monsterImg,m.x,m.y,80,80);
-  });
-
-  ctx.font="18px Arial";
-  ctx.fillText("Score: "+score,200,30);
-  ctx.font="14px Arial";
-  ctx.fillText("Best: "+best,200,50);
+ctx.fillStyle="white";
+ctx.textAlign="center";
+ctx.font="18px Arial";
+ctx.fillText("Score: "+score,canvas.width/2,30);
+ctx.font="14px Arial";
+ctx.fillText("Best: "+best,canvas.width/2,50);
 }
 
 /* LOOP */
 function loop(){
-  update();
-  draw();
-  requestAnimationFrame(loop);
+update();
+draw();
+requestAnimationFrame(loop);
 }
-
-/* RESTART */
-restartBtn.onclick=()=>{
-  score=0;
-  monsters.length=0;
-  lasers.length=0;
-  gameOver=false;
-  gameOverText.style.display="none";
-  restartBtn.style.display="none";
-  backBtn.style.display="none";
-};
-
-/* BACK */
-backBtn.onclick=()=>{
-  location.href="index.html";
-};
 </script>
 
 </body>
