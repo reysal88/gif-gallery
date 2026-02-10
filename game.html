@@ -9,16 +9,18 @@
     margin: 0;
     padding: 0;
     background-color: #000;
-    color: #fff;
     font-family: Arial, sans-serif;
     text-align: center;
     overflow: hidden;
+    color: #fff;
   }
 
   canvas {
     display: block;
     margin: 0 auto;
     background-color: #000;
+    max-width: 100%;
+    height: auto;
   }
 
   h1 {
@@ -37,21 +39,32 @@
 <body>
 
 <h1>Rialo: Catch the Oracle</h1>
-<canvas id="gameCanvas" width="400" height="600"></canvas>
+<canvas id="gameCanvas"></canvas>
 <button id="restartBtn">Restart Game</button>
 
 <script>
-// ===== Canvas setup =====
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+
+let canvasWidth = window.innerWidth * 0.9;
+let canvasHeight = window.innerHeight * 0.7;
+canvas.width = canvasWidth;
+canvas.height = canvasHeight;
 
 let gameOver = false;
 let score = 0;
 
-// Pesawat placeholder
-const ship = { x: canvas.width/2 - 25, y: canvas.height - 60, width: 50, height: 50, speed: 5, dx: 0 };
+// Pesawat
+const ship = { 
+  x: canvas.width/2 - 25, 
+  y: canvas.height - 60, 
+  width: 50, 
+  height: 50, 
+  dx: 0,
+  speed: 5
+};
 
-// Monster placeholder
+// Monster
 const monsters = [];
 const monsterSize = 40;
 const monsterSpeed = 2;
@@ -61,6 +74,10 @@ const lasers = [];
 const laserWidth = 5;
 const laserHeight = 20;
 const laserSpeed = 7;
+
+// Timer for monster spawn
+let lastSpawn = 0;
+const spawnDelay = 2000;
 
 // ===== Controls =====
 let touchX = null;
@@ -73,4 +90,82 @@ document.addEventListener('keydown', e => {
 });
 
 document.addEventListener('keyup', e => {
-  if(e.key
+  if(e.key === 'ArrowLeft' || e.key === 'ArrowRight') ship.dx = 0;
+});
+
+// Touch move & tap
+canvas.addEventListener('touchstart', e => {
+  const rect = canvas.getBoundingClientRect();
+  const touchY = e.touches[0].clientY - rect.top;
+  touchX = e.touches[0].clientX - rect.left;
+  isTouching = true;
+
+  // Tap pesawat shoot
+  if(touchX >= ship.x && touchX <= ship.x + ship.width &&
+     touchY >= ship.y && touchY <= ship.y + ship.height) {
+       shootLaser();
+  }
+});
+
+canvas.addEventListener('touchmove', e => {
+  touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+});
+
+canvas.addEventListener('touchend', e => {
+  isTouching = false;
+});
+
+// Click desktop shoot
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const clickY = e.clientY - rect.top;
+
+  if(clickX >= ship.x && clickX <= ship.x + ship.width &&
+     clickY >= ship.y && clickY <= ship.y + ship.height) {
+       shootLaser();
+  }
+});
+
+// ===== Functions =====
+function shootLaser() {
+  lasers.push({ x: ship.x + ship.width/2 - laserWidth/2, y: ship.y, width: laserWidth, height: laserHeight });
+}
+
+function spawnMonster() {
+  const x = Math.random() * (canvas.width - monsterSize);
+  monsters.push({ x: x, y: -monsterSize, width: monsterSize, height: monsterSize });
+}
+
+function update(deltaTime) {
+  if(gameOver) return;
+
+  // Update ship
+  ship.x += ship.dx;
+  if(isTouching && touchX !== null) ship.x = touchX - ship.width/2;
+  if(ship.x < 0) ship.x = 0;
+  if(ship.x + ship.width > canvas.width) ship.x = canvas.width - ship.width;
+
+  // Update lasers
+  for(let i = lasers.length - 1; i >= 0; i--){
+    lasers[i].y -= laserSpeed;
+    if(lasers[i].y + lasers[i].height < 0) lasers.splice(i,1);
+  }
+
+  // Update monsters
+  for(let i = monsters.length -1; i>=0; i--){
+    monsters[i].y += monsterSpeed;
+
+    // Collision with ship
+    if(ship.x < monsters[i].x + monsters[i].width &&
+       ship.x + ship.width > monsters[i].x &&
+       ship.y < monsters[i].y + monsters[i].height &&
+       ship.y + ship.height > monsters[i].y) {
+         gameOver = true;
+         document.getElementById('restartBtn').style.display = 'inline-block';
+    }
+
+    // Collision with lasers
+    for(let j=lasers.length-1; j>=0; j--){
+      if(lasers[j].x < monsters[i].x + monsters[i].width &&
+         lasers[j].x + lasers[j].width > monsters
