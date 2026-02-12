@@ -46,7 +46,7 @@ button:disabled { opacity:0.5; cursor:not-allowed;}
   <div id="history-completed"></div>
 </div>
 
-<!-- Modal -->
+<!-- Modal untuk single/parlay -->
 <div id="betModal" class="modal">
   <div class="modal-content">
     <h3>Place Bet</h3>
@@ -84,29 +84,12 @@ function renderHistory(){
   historyRunningDiv.innerHTML=''; historyCompletedDiv.innerHTML='';
   historyRunning.forEach(h=>{
     const div=document.createElement('div'); div.className='history-item';
-    if(h.type==='single'){
-      div.innerText = `Single Bet ${h.market.toUpperCase()} ${h.direction.toUpperCase()} ${h.amount} RLO`;
-    } else if(h.type==='parlay'){
-      let text = `Parlay Bet (${h.amount} RLO)`;
-      h.markets.forEach(m=>{
-        text += `\n${m.market.toUpperCase()} - ${m.direction.toUpperCase()}`;
-      });
-      div.innerText = text;
-    }
+    div.innerText=h.text;
     historyRunningDiv.appendChild(div);
   });
-
   historyCompleted.forEach(h=>{
     const div=document.createElement('div'); div.className='history-item';
-    if(h.type==='single'){
-      div.innerText = `${h.market.toUpperCase()} ${h.direction.toUpperCase()} ${h.amount} RLO - ${h.result}`;
-    } else if(h.type==='parlay'){
-      let text = `Parlay Bet (${h.amount} RLO) - ${h.result}`;
-      h.markets.forEach(m=>{
-        text += `\n${m.market.toUpperCase()} - ${m.direction.toUpperCase()}`;
-      });
-      div.innerText = text;
-    }
+    div.innerText=h.text;
     historyCompletedDiv.appendChild(div);
   });
 }
@@ -119,7 +102,7 @@ function renderParlay(){
     div.innerText=`${p.market} - ${p.direction.toUpperCase()}`;
     parlayDiv.appendChild(div);
   });
-  document.getElementById('confirm-parlay').disabled = parlayList.length<3;
+  document.getElementById('confirm-parlay').disabled = parlayList.length<1;
 }
 
 renderHistory();
@@ -183,19 +166,23 @@ document.getElementById('confirmBet').onclick=()=>{
   const selectedType=Array.from(betRadios).find(r=>r.checked)?.value;
   if(!selectedType){ alert('Choose Single or Parlay'); return; }
 
+  const betID = Date.now() + Math.random();
+
   if(selectedType==='single'){
     const amt=parseInt(singleAmountInput.value);
     if(isNaN(amt)||amt<=0||amt>wallet){ alert('Invalid amount'); return; }
     wallet-=amt; saveState(); document.getElementById('rlo').innerText=wallet;
 
     const runningBet = {
-      betID: Date.now(),
+      betID: betID,
       market: currentBetMarket,
       direction: currentBetDirection,
-      type:'single',
-      amount:amt,
-      startTime:Date.now(),
-      duration:2*60*1000
+      type: 'single',
+      amount: amt,
+      multiplier: 2,
+      startTime: Date.now(),
+      duration: 2*60*1000,
+      text:`Single Bet ${currentBetMarket} ${currentBetDirection.toUpperCase()} ${amt} RLO`
     };
     historyRunning.push(runningBet);
     saveState(); renderHistory();
@@ -203,9 +190,10 @@ document.getElementById('confirmBet').onclick=()=>{
     setTimeout(()=>{
       const winAmt = amt*2;
       wallet += winAmt;
-      historyCompleted.push({...runningBet, result:'WON'});
-      historyRunning = historyRunning.filter(b=>b.betID!==runningBet.betID);
-      saveState(); renderHistory(); document.getElementById('rlo').innerText=wallet;
+      historyCompleted.push({...runningBet, text:`Single Bet ${currentBetMarket} ${currentBetDirection.toUpperCase()} Won ${winAmt} RLO`});
+      historyRunning = historyRunning.filter(b=>b.betID!==betID);
+      saveState(); renderHistory();
+      document.getElementById('rlo').innerText = wallet;
     }, runningBet.duration);
 
   } else if(selectedType==='parlay'){
@@ -221,38 +209,48 @@ document.getElementById('confirmBet').onclick=()=>{
 window.onclick=function(event){ if(event.target==modal){ modal.style.display='none'; } };
 
 // --- Parlay Confirm ---
-document.getElementById('confirm-parlay').onclick=()=>{
-  const amt=parseInt(document.getElementById('parlay-amount').value);
-  if(isNaN(amt)||amt<=0||amt>wallet){ alert('Invalid amount'); return; }
-  wallet-=amt; document.getElementById('rlo').innerText=wallet;
+document.getElementById('confirm-parlay').onclick = () => {
+  const amt = parseInt(document.getElementById('parlay-amount').value);
+  if(isNaN(amt) || amt<=0 || amt>wallet){ alert('Invalid amount'); return; }
+  wallet -= amt; document.getElementById('rlo').innerText = wallet;
 
   const duration = 2*60*1000;
-  const parlayBet={
-    betID: Date.now(),
-    type:'parlay',
-    amount:amt,
-    startTime:Date.now(),
-    duration:duration,
-    markets:parlayList.map(p=>({market:p.market,direction:p.direction})),
-    multiplier:2
-  };
-  historyRunning.push(parlayBet);
+  const parlayID = Date.now() + Math.random();
 
-  setTimeout(()=>{
-    let winAmt = amt;
-    parlayBet.markets.forEach(()=>{ winAmt *= 2; }); // x2 per market
-    wallet += winAmt;
-    historyCompleted.push({...parlayBet, result:'WON'});
-    historyRunning = historyRunning.filter(b=>b.betID!==parlayBet.betID);
-    saveState(); renderHistory(); document.getElementById('rlo').innerText=wallet;
-  }, duration);
+  parlayList.forEach(p=>{
+    const runningBet = {
+      betID: parlayID,
+      market: p.market,
+      direction: p.direction,
+      type:'parlay',
+      amount: amt,
+      multiplier: 2,
+      startTime: Date.now(),
+      duration: duration,
+      text:`Parlay ${p.market} ${p.direction.toUpperCase()} ${amt} RLO`
+    };
+    historyRunning.push(runningBet);
 
-  parlayList=[]; document.getElementById('parlay-amount').value='';
-  saveState(); renderParlay(); renderHistory();
-}
+    setTimeout(()=>{
+      const winAmt = amt*2;
+      wallet += winAmt;
+      historyCompleted.push({...runningBet, text:`Parlay ${p.market} ${p.direction.toUpperCase()} Won ${winAmt} RLO`});
+      historyRunning = historyRunning.filter(b=>b.betID!==parlayID);
+      saveState(); renderHistory();
+      document.getElementById('rlo').innerText = wallet;
+    }, duration);
+  });
+
+  parlayList = [];
+  document.getElementById('parlay-amount').value='';
+  saveState();
+  renderParlay();
+  renderHistory();
+};
 
 // --- Start ---
-fetchPrices(); setInterval(fetchPrices,1000);
+fetchPrices();
+setInterval(fetchPrices,1000);
 </script>
 </body>
 </html>
