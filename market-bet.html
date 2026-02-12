@@ -236,33 +236,52 @@ function confirmBet(){
 // =======================
 
 function updateBets(){
-  const runningDiv=document.getElementById("running");
-  runningDiv.innerHTML="";
+  const runningDiv = document.getElementById("running");
+  runningDiv.innerHTML = "";
 
+  // Gunakan loop mundur supaya splice aman
   for(let i = runningBets.length - 1; i >= 0; i--){
-
     const bet = runningBets[i];
     const remaining = bet.duration - (Date.now() - bet.startTime);
 
     if(remaining <= 0){
-      settleBet(i);
-      continue;
+      // Waktu habis, settle bet
+      const currentPrice = marketData[bet.market] || 0;
+      let win = false;
+      if(bet.side === "YES"){
+        win = currentPrice >= bet.entryPrice;
+      } else {
+        win = currentPrice < bet.entryPrice;
+      }
+
+      bet.exitPrice = currentPrice;
+      bet.result = win ? "WIN" : "LOSE";
+
+      if(win){
+        wallet += bet.amount * 2;
+        document.getElementById("rlo").innerText = wallet;
+      }
+
+      completedBets.push(bet);
+      runningBets.splice(i, 1);
+      saveData();
+      continue; // lanjut ke bet berikutnya
     }
 
-    const m=Math.floor(remaining/60000);
-    const s=Math.floor((remaining%60000)/1000);
+    // Hitung menit dan detik tersisa
+    const m = Math.floor(remaining / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
 
-    const div=document.createElement("div");
-    div.innerHTML=
-      `<b>${bet.side} ${bet.market}</b> |
-       Entry: ${bet.entryPrice.toFixed(2)} |
-       Amount: ${bet.amount} |
-       ${m}:${String(s).padStart(2,'0')}`;
+    const div = document.createElement("div");
+    div.innerText =
+      `${bet.side === "YES" ? "UP" : "DOWN"} ${bet.market} | ${bet.amount} | Entry: ${bet.entryPrice.toFixed(2)} | ${m}:${String(s).padStart(2,'0')}`;
 
     runningDiv.appendChild(div);
   }
-    }
 
+  // Render completed setiap update
+  renderCompleted();
+}
 // =======================
 // SETTLE BET
 // =======================
