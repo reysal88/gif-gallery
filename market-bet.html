@@ -94,7 +94,6 @@ renderParlay();
   
 // --- Market ---  
 const markets=['BTC','ETH','SOL','BNB','AVAX'];  
-<script>
 let marketData = {
   BTC: 0,
   ETH: 0,
@@ -114,14 +113,13 @@ async function fetchPrices() {
       if(item.symbol === "SOLUSDT") marketData.SOL = parseFloat(item.price);
       if(item.symbol === "BNBUSDT") marketData.BNB = parseFloat(item.price);
       if(item.symbol === "AVAXUSDT") marketData.AVAX = parseFloat(item.price);
-    });
+  }
 
     renderMarkets();
 
-  } catch (err) {
+  
     console.log("Binance API error");
-  }
-}
+  
 
 // jalan pertama kali
 renderMarkets();
