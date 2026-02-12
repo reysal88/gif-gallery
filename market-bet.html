@@ -120,7 +120,7 @@ function renderMarkets(){
   
     const targetUp=(marketData[m]*1.001).toFixed(2);  
     const upRow=document.createElement('div'); upRow.className='bet-row';  
-    const upLabel=document.createElement('span'); upLabel.innerText=`WILL UP TO ${targetUp} IN 5 MIN?`;  
+    const upLabel=document.createElement('span'); upLabel.innerText=`WILL UP TO ${targetUp} IN 2 MIN?`;  
     const yesBtn=document.createElement('button'); yesBtn.innerText='YES'; yesBtn.onclick=()=>openBetModal(m,'up');  
     const noBtn=document.createElement('button'); noBtn.innerText='NO'; noBtn.onclick=()=>openBetModal(m,'up');  
     upRow.appendChild(upLabel); upRow.appendChild(yesBtn); upRow.appendChild(noBtn);  
