@@ -5,132 +5,136 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rialo Fun</title>
 <style>
-  /* ===== CSS LAMA ===== */
-  body {
-    background-color: #f5f0e6;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    text-align: center;
-  }
+/* ===== RESET & BODY ===== */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-  main {
-    flex: 1;
-  }
+main {
+  flex: 0 1 auto; /* tinggi mengikuti konten */
+  text-align: center;
+  padding: 20px 10px;
+}
 
-  header h1 {
-    margin: 20px 0;
-    font-size: 2em;
-    font-weight: bold;
-    animation: blink 1s infinite alternate;
-  }
+/* ===== HEADER ===== */
+header h1 {
+  margin: 20px 0;
+  font-size: 2em;
+  font-weight: bold;
+  animation: blink 1s infinite alternate;
+}
+@keyframes blink {
+  0%   { color: #000; }
+  25%  { color: #ff0; }
+  50%  { color: #f00; }
+  75%  { color: #0f0; }
+  100% { color: #000; }
+}
 
-  @keyframes blink {
-    0%   { color: #000; }
-    25%  { color: #ff0; }
-    50%  { color: #f00; }
-    75%  { color: #0f0; }
-    100% { color: #000; }
-  }
+/* ===== MENU ICONS ===== */
+.menu {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
 
-  .menu {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 40px;
-    flex-wrap: wrap;
-  }
-
-  .menu img {
-    width: 15vw;
-    max-width: 150px;
-    min-width: 100px;
-    height: auto;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .menu img:hover {
-    transform: scale(1.1); }
-    .menu img.market-icon {
-  width: auto;          /* ukuran dasar sesuai gambar */
-  max-width: 300px;     /* batas maksimal di desktop */
-  min-width: 200px;     /* batas minimal di HP */
-  height: auto;
-  margin: 0 10px;       /* jarak icon dari icon lain */
+.menu img {
+  cursor: pointer;
   transition: transform 0.2s;
 }
 
-.menu img.market-icon:hover {
+.menu img:hover {
   transform: scale(1.1);
-          }
-  }
+}
 
-  footer {
-    background-color: #e0d8c2;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    position: sticky; /* atau fixed kalau mau selalu terlihat */
-  bottom: 0;
+/* ===== ICON DEFAULT ===== */
+.menu img.default-icon {
+  width: 15vw;
+  max-width: 150px;
+  min-width: 100px;
+  height: auto;
+}
+
+/* ===== MARKET BET FUN ICON ===== */
+.menu img.market-icon {
+  width: auto;
+  max-width: 300px;  /* besar di desktop */
+  min-width: 200px;  /* minimal di HP */
+  height: auto;
+}
+
+/* ===== TYPING TEXT ===== */
+.typing-text {
+  font-size: 2em;
+  font-weight: bold;
+  color: #333;
+  margin: 30px auto 0 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: none;
+  width: 0;
+  animation: typing 5s steps(16, end) forwards;
+}
+@keyframes typing {
+  from { width: 0; }
+  to { width: 16ch; } /* "Rialo Fun Zone" panjang 16 karakter */
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background-color: #e0d8c2;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between; /* kiri-tengah-kanan */
+  align-items: center;
+  flex-wrap: wrap;
   width: 100%;
   box-sizing: border-box;
-      }
-  }
+}
 
-  .footer-left a,
-  .footer-center a {
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
-  }
+.footer-left a,
+.footer-center a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
 
-  .footer-right a {
-    text-decoration: none;
-    color: #333;
-  }
+.footer-right a {
+  text-decoration: none;
+  color: #333;
+}
 
+.footer-right img {
+  width: 24px;
+  height: 24px;
+  margin-left: 8px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .menu {
+    gap: 15px;
+  }
+  .menu img.default-icon {
+    max-width: 120px;
+  }
+  .menu img.market-icon {
+    max-width: 250px;
+  }
+  footer {
+    flex-direction: column;
+    gap: 5px;
+  }
   .footer-right img {
-    width: 24px;
-    height: 24px;
-    margin-left: 8px;
+    margin-left: 5px;
   }
-
-  @media (max-width: 600px) {
-    footer {
-      flex-direction: column;
-      gap: 5px;
-    }
-    .footer-right img {
-      margin-left: 5px;
-    }
-  }
-  /* ===== CSS LAMA SELESAI ===== */
-
-  /* ===== CSS EFEK TYPING ===== */
-  .typing-text {
-    font-size: 2em;              
-    font-weight: bold;
-    color: #333;
-    margin: 30px auto 0 auto;  /* horizontal di tengah */
-    white-space: nowrap;          
-    overflow: hidden;             
-    border-right: none;           /* hilangkan kursor | */
-    width: 0;                     
-    animation: typing 5s steps(16, end) forwards; /* lambat 5 detik */
-    text-align: center;
-  }
-
-  @keyframes typing {
-    from { width: 0; }
-    to { width: 16ch; } /* panjang teks "Rialo Fun Zone" */
-  }
-  /* ===== SELESAI CSS EFEK TYPING ===== */
+}
 </style>
 </head>
 <body>
@@ -140,20 +144,21 @@
 </header>
 
 <main>
-  <!-- Menu Logo -->
+  <!-- Baris pertama: Quiz, Game, GIF -->
   <div class="menu">
-    <a href="quiz.html"><img src="images/quiz.png" alt="Fun Quiz"></a>
-    <a href="game.html"><img src="images/game-logo.png" alt="Fun Game"></a>
-    <a href="gif.html"><img src="images/gif.png" alt="Fun GIF"></a>
-    </div>
-
-  <div class="menu">
-  <a href="market-bet.html">
-    <img src="images/market-bet.png" alt="Market Bet Fun" class="market-icon">
-  </a>
+    <a href="quiz.html"><img src="images/quiz.png" alt="Fun Quiz" class="default-icon"></a>
+    <a href="game.html"><img src="images/game-logo.png" alt="Fun Game" class="default-icon"></a>
+    <a href="gif.html"><img src="images/gif.png" alt="Fun GIF" class="default-icon"></a>
   </div>
 
-  <!-- Tulisan Rialo Fun Zone dengan efek diketik -->
+  <!-- Baris kedua: Market Bet Fun -->
+  <div class="menu">
+    <a href="market-bet.html">
+      <img src="images/market-bet.png" alt="Market Bet Fun" class="market-icon">
+    </a>
+  </div>
+
+  <!-- Tulisan Rialo Fun Zone -->
   <h2 class="typing-text">Rialo Fun Zone</h2>
 </main>
 
