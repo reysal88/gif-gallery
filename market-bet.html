@@ -118,7 +118,7 @@ function renderMarkets(){
     h2.innerText=`${m} ${marketData[m].toFixed(2)} USD`;  
     box.appendChild(h2);  
   
-    const targetUp=(marketData[m]*1.001).toFixed(2);  
+    const targetUp=(marketData[m]*1.0008).toFixed(2);  
     const upRow=document.createElement('div'); upRow.className='bet-row';  
     const upLabel=document.createElement('span'); upLabel.innerText=`WILL UP TO ${targetUp} IN 2 MIN?`;  
     const yesBtn=document.createElement('button'); yesBtn.innerText='YES'; yesBtn.onclick=()=>openBetModal(m,'up');  
