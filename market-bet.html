@@ -239,12 +239,14 @@ function updateBets(){
   const runningDiv=document.getElementById("running");
   runningDiv.innerHTML="";
 
-  runningBets.forEach((bet,index)=>{
-    const remaining=bet.duration-(Date.now()-bet.startTime);
+  for(let i = runningBets.length - 1; i >= 0; i--){
 
-    if(remaining<=0){
-      settleBet(index);
-      return;
+    const bet = runningBets[i];
+    const remaining = bet.duration - (Date.now() - bet.startTime);
+
+    if(remaining <= 0){
+      settleBet(i);
+      continue;
     }
 
     const m=Math.floor(remaining/60000);
@@ -258,8 +260,8 @@ function updateBets(){
        ${m}:${String(s).padStart(2,'0')}`;
 
     runningDiv.appendChild(div);
-  });
-}
+  }
+    }
 
 // =======================
 // SETTLE BET
