@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Market Bet Fun</title>
+<div class="market-title">
+  <img src="rialo-logo.png" alt="Rialo Logo" class="market-logo">
+  <span>Market Bet Fun</span>
+</div>
 <style>
 body { margin:0; font-family:Arial; background:#000; color:#fff;}
 header { padding:15px; font-size:1.5em;}
@@ -69,6 +72,17 @@ input[type="number"] { color:white; background:#333; border:1px solid #555; padd
   padding: 2px 6px;
   border-radius: 3px;
   cursor: pointer;
+
+  .market-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.market-logo {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
 }
 }
 </style>
