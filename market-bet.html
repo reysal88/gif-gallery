@@ -218,7 +218,9 @@ function openParlaySelection(){
   <button class="up-btn" onclick="selectParlay('${m}','UP')">UP</button>
   <button class="down-btn" onclick="selectParlay('${m}','DOWN')">DOWN</button>
 `;
-  });
+  container.appendChild(div);  // 
+});
+  
   updateParlayList();
 }
 function selectParlay(market,side){
