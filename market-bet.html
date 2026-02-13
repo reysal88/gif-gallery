@@ -84,7 +84,19 @@ input[type="number"] {
 
 <header>Market Bet Fun</header>
 <div id="wallet">Credit: <span id="rlo">1000</span> RLO</div>
+<!-- Modal VPN Warning -->
+<div id="vpnModal" class="modal">
+  <div class="modal-content">
+    <h2>⚠️ Please use VPN</h2>
+    <p>If market data does not load, make sure your VPN is ON.</p>
+    <button onclick="closeVpnModal()">OK</button>
+  </div>
+</div>
 
+<script>
+function closeVpnModal() {
+  document.getElementById("vpnModal").style.display = "none";
+}
 <div class="market-container" id="markets"></div>
 
 <div id="history">
