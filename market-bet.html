@@ -42,6 +42,34 @@ input[type="number"] { color:white; background:#333; border:1px solid #555; padd
   width: 50px;          /* semua label punya lebar sama */
   text-align: right;     /* label rata kanan */
   margin-right: 10px;    /* jarak ke tombol */
+
+  #parlayList div {
+  display: flex;
+  justify-content: space-between; /* kiri dan kanan */
+  align-items: center;
+  margin: 5px 0;
+  padding: 3px 8px;
+  background: #111;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+/* Container untuk UP/DOWN + market/harga */
+#parlayList div .left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Tombol remove tetap di kanan */
+#parlayList div button {
+  background: #f00;
+  color: #fff;
+  border: none;
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+}
 }
 </style>
 </head>
@@ -234,7 +262,13 @@ function updateParlayList(){
   div.innerHTML="";
   tempParlay.forEach((s,i)=>{
     const selDiv = document.createElement("div");
-    selDiv.innerHTML = `${s.side==="UP"?'<span class="up-text">UP</span>':'<span class="down-text">DOWN</span>'} ${s.market} ${s.price.toFixed(2)}$ <button onclick="removeParlay(${i})">Remove</button>`;
+    selDiv.innerHTML = `
+  <div class="left">
+    ${s.side==="UP"?'<span class="up-text">UP</span>':'<span class="down-text">DOWN</span>'}
+    <span>${s.market} ${s.price.toFixed(2)}$</span>
+  </div>
+  <button onclick="removeParlay(${i})">Remove</button>
+`;
     div.appendChild(selDiv);
   });
   document.getElementById("parlayMultiple").innerText = tempParlay.length*4;
