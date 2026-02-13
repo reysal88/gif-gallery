@@ -31,44 +31,18 @@ input[type="number"] { color:white; background:#333; border:1px solid #555; padd
   
 /* ===== CSS PARLAY ===== */
 #parlayMarkets div {
-  display: flex;               /* horizontal */
-  justify-content: flex-start; /* rata kiri */
-  align-items: center;         /* vertikal sejajar */
-  margin: 5px 0;
-  gap: 10px;                   /* jarak antar tombol */
-}
-#parlayMarkets div button {
-  flex: 0 0 auto;              /* tombol tidak melebar */
-  padding: 6px 12px;
-  font-weight: bold;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-}
-.up-btn { background: #0f0; color:#000; }
-.down-btn { background: #f00; color:#fff; }
-
-/* Selected list */
-#parlayList div {
   display: flex;
-  justify-content: space-between; /* teks kiri, tombol Remove kanan */
+  justify-content: flex-start;   /* semua rata kiri */
   align-items: center;
   margin: 5px 0;
-  padding: 3px 8px;
-  background: #111;
-  border-radius: 5px;
-  font-size: 14px;
+  gap: 10px;
 }
-#parlayList div button {
-  background: #f00;
-  color: #fff;
-  border: none;
-  padding: 2px 6px;
-  border-radius: 3px;
-  cursor: pointer;
+
+#parlayMarkets div span.market-label {
+  width: 50px;          /* semua label punya lebar sama */
+  text-align: right;     /* label rata kanan */
+  margin-right: 10px;    /* jarak ke tombol */
 }
-#parlayList div span.up-text { color:#0f0; font-weight:bold; }
-#parlayList div span.down-text { color:#f00; font-weight:bold; }
 </style>
 </head>
 <body>
@@ -240,11 +214,10 @@ function openParlaySelection(){
   markets.forEach(m=>{
     const div=document.createElement("div");
     div.innerHTML=`
-      ${m}: 
-      <button class="up-btn" onclick="selectParlay('${m}','UP')">UP</button>
-      <button class="down-btn" onclick="selectParlay('${m}','DOWN')">DOWN</button>
-    `;
-    container.appendChild(div);
+  <span class="market-label">${m} :</span>
+  <button class="up-btn" onclick="selectParlay('${m}','UP')">UP</button>
+  <button class="down-btn" onclick="selectParlay('${m}','DOWN')">DOWN</button>
+`;
   });
   updateParlayList();
 }
