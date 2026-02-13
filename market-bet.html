@@ -61,6 +61,7 @@ input[type="number"] {
   width:100%;
   height:100%;
   background:rgba(0,0,0,0.8);
+  z-index:9999;
 }
 
 .modal-content {
@@ -84,19 +85,7 @@ input[type="number"] {
 
 <header>Market Bet Fun</header>
 <div id="wallet">Credit: <span id="rlo">1000</span> RLO</div>
-<!-- Modal VPN Warning -->
-<div id="vpnModal" class="modal">
-  <div class="modal-content">
-    <h2>⚠️ Please use VPN</h2>
-    <p>If market data does not load, make sure your VPN is ON.</p>
-    <button onclick="closeVpnModal()">OK</button>
-  </div>
-</div>
 
-<script>
-function closeVpnModal() {
-  document.getElementById("vpnModal").style.display = "none";
-}
 <div class="market-container" id="markets"></div>
 
 <div id="history">
@@ -105,11 +94,18 @@ function closeVpnModal() {
   <div id="running"></div>
 
   <h4>Completed 
-    <button onclick="clearCompleted()" style="padding:2px 6px; font-size:12px; cursor:pointer;">
-      Delete
-    </button>
+    <button onclick="clearCompleted()" style="padding:2px 6px; font-size:12px; cursor:pointer;">Delete</button>
   </h4>
   <div id="completed"></div>
+</div>
+
+<!-- Modal VPN -->
+<div id="vpnModal" class="modal">
+  <div class="modal-content">
+    <h2>⚠️ Please Use VPN</h2>
+    <p>Market data may not load correctly if you are not using a VPN.</p>
+    <button onclick="acceptVPN()">OK</button>
+  </div>
 </div>
 
 <!-- Modal Bet -->
@@ -132,9 +128,11 @@ function closeVpnModal() {
 </div>
 
 <script>
-// ====== CONFIG ======
+// =======================
+// DATA & WALLET
+// =======================
 const markets = ["BTC","ETH","SOL","BNB","AVAX"];
-let marketData = {};      // menyimpan harga terakhir
+let marketData = {};
 let wallet = 1000;
 let runningBets = [];
 let completedBets = [];
@@ -149,25 +147,32 @@ function saveData(){
   localStorage.setItem("wallet", wallet);
   localStorage.setItem("runningBets", JSON.stringify(runningBets));
   localStorage.setItem("completedBets", JSON.stringify(completedBets));
-  localStorage.setItem("marketData", JSON.stringify(marketData));
 }
 
 function loadData(){
   const w = localStorage.getItem("wallet");
   const r = localStorage.getItem("runningBets");
   const c = localStorage.getItem("completedBets");
-  const m = localStorage.getItem("marketData");
 
   if(w) wallet = parseInt(w);
   if(r) runningBets = JSON.parse(r);
   if(c) completedBets = JSON.parse(c);
-  if(m) marketData = JSON.parse(m);
 
   document.getElementById("rlo").innerText = wallet;
-  renderMarkets();
   renderCompleted();
 }
 loadData();
+
+// =======================
+// ACCEPT VPN
+// =======================
+function acceptVPN(){
+  document.getElementById("vpnModal").style.display = "none";
+  // mulai market setelah VPN accepted
+  fetchPrices();
+  setInterval(fetchPrices,2000); // update setiap 2 detik
+  setInterval(updateBets,1000);  // update running bets
+}
 
 // =======================
 // RENDER MARKETS
@@ -193,49 +198,43 @@ function renderMarkets(){
 }
 
 // =======================
-// COINGECKO API FETCH (ALWAYS SHOW)
+// BINANCE API
 // =======================
 async function fetchPrices(){
-  try {
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,avalanche-2&vs_currencies=usd"
-    );
+  try{
+    const res = await fetch("https://api.binance.com/api/v3/ticker/price");
     const data = await res.json();
 
-    if(data.bitcoin) marketData.BTC = data.bitcoin.usd;
-    if(data.ethereum) marketData.ETH = data.ethereum.usd;
-    if(data.solana) marketData.SOL = data.solana.usd;
-    if(data.binancecoin) marketData.BNB = data.binancecoin.usd;
-    if(data["avalanche-2"]) marketData.AVAX = data["avalanche-2"].usd;
+    data.forEach(item=>{
+      if(item.symbol==="BTCUSDT") marketData.BTC=parseFloat(item.price);
+      if(item.symbol==="ETHUSDT") marketData.ETH=parseFloat(item.price);
+      if(item.symbol==="SOLUSDT") marketData.SOL=parseFloat(item.price);
+      if(item.symbol==="BNBUSDT") marketData.BNB=parseFloat(item.price);
+      if(item.symbol==="AVAXUSDT") marketData.AVAX=parseFloat(item.price);
+    });
 
-  } catch(e) {
-    console.log("CoinGecko API error:", e);
-    // tidak menghapus marketData, harga terakhir tetap muncul
-  }
-
-  renderMarkets();
+    renderMarkets();
+  } catch(e){ console.log(e); }
 }
 
 // =======================
 // OPEN BET
 // =======================
 function openBet(market,side){
-  currentMarket=market;
-  currentSide=side;
-  document.getElementById("betTitle").innerText=
-    side+" "+market;
-  document.getElementById("betModal").style.display="block";
+  currentMarket = market;
+  currentSide = side;
+  document.getElementById("betTitle").innerText = side + " " + market;
+  document.getElementById("betModal").style.display = "block";
 }
 
 // =======================
 // CONFIRM BET
 // =======================
 function confirmBet(){
-  const amt=parseInt(document.getElementById("betAmount").value);
-  if(!amt||amt<=0||amt>wallet){ alert("Invalid amount"); return; }
+  const amt = parseInt(document.getElementById("betAmount").value);
+  if(!amt || amt <= 0 || amt > wallet){ alert("Invalid amount"); return; }
 
   const entryPrice = marketData[currentMarket];
-
   wallet -= amt;
   document.getElementById("rlo").innerText = wallet;
 
@@ -249,7 +248,7 @@ function confirmBet(){
   });
 
   saveData();
-  document.getElementById("betModal").style.display="none";
+  document.getElementById("betModal").style.display = "none";
   document.getElementById("betAmount").value="";
 }
 
@@ -260,19 +259,19 @@ function updateBets(){
   const runningDiv = document.getElementById("running");
   runningDiv.innerHTML="";
 
-  for(let i=runningBets.length-1;i>=0;i--){
-    const bet=runningBets[i];
-    const remaining=bet.duration-(Date.now()-bet.startTime);
+  for(let i=runningBets.length-1; i>=0; i--){
+    const bet = runningBets[i];
+    const remaining = bet.duration - (Date.now() - bet.startTime);
 
-    if(remaining<=0){
+    if(remaining <= 0){
       settleBet(i);
       continue;
     }
 
-    const m=Math.floor(remaining/60000);
-    const s=Math.floor((remaining%60000)/1000);
+    const m = Math.floor(remaining / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
 
-    const div=document.createElement("div");
+    const div = document.createElement("div");
     div.innerText = `${bet.side} ${bet.market} | ${bet.amount} | Entry: ${bet.entryPrice.toFixed(2)} | ${m}:${String(s).padStart(2,'0')}`;
     runningDiv.appendChild(div);
   }
@@ -284,14 +283,15 @@ function updateBets(){
 // SETTLE BET
 // =======================
 function settleBet(index){
-  const bet=runningBets[index];
-  const currentPrice=marketData[bet.market];
+  const bet = runningBets[index];
+  const currentPrice = marketData[bet.market];
 
-  let win=false;
-  if(bet.side==="UP"){ win=currentPrice >= bet.entryPrice; }
-  else { win=currentPrice < bet.entryPrice; }
+  let win = false;
+  if(bet.side === "UP") win = currentPrice >= bet.entryPrice;
+  else win = currentPrice < bet.entryPrice;
 
-  if(win){ wallet += bet.amount*2; document.getElementById("rlo").innerText = wallet; }
+  if(win) wallet += bet.amount*2;
+  document.getElementById("rlo").innerText = wallet;
 
   completedBets.push({
     ...bet,
@@ -312,7 +312,7 @@ function renderCompleted(){
   completedDiv.innerHTML = "";
 
   completedBets.forEach(bet=>{
-    const div=document.createElement("div");
+    const div = document.createElement("div");
     div.innerHTML = `
       <b>${bet.side} ${bet.market}</b><br>
       Amount: ${bet.amount}<br>
@@ -328,34 +328,17 @@ function renderCompleted(){
 // =======================
 // DELETE COMPLETED
 // =======================
-function clearCompleted() {
-  document.getElementById("confirmModal").style.display = "block";
-}
-
-function closeConfirmModal() {
-  document.getElementById("confirmModal").style.display = "none";
-}
-
-function deleteAllCompleted() {
-  completedBets = [];
-  saveData();
-  renderCompleted();
-  closeConfirmModal();
-}
+function clearCompleted() { document.getElementById("confirmModal").style.display = "block"; }
+function closeConfirmModal() { document.getElementById("confirmModal").style.display = "none"; }
+function deleteAllCompleted() { completedBets = []; saveData(); renderCompleted(); closeConfirmModal(); }
 
 // =======================
 // CLOSE MODAL ON CLICK OUTSIDE
 // =======================
 window.onclick = function(e){
-  if(e.target.id==="betModal"){ document.getElementById("betModal").style.display="none"; }
-  if(e.target.id==="confirmModal"){ document.getElementById("confirmModal").style.display="none"; }
+  if(e.target.id==="betModal") document.getElementById("betModal").style.display="none";
+  if(e.target.id==="confirmModal") document.getElementById("confirmModal").style.display="none";
 };
-
-// ======= START FETCH & UPDATE =======
-fetchPrices();                     // fetch pertama kali
-setInterval(fetchPrices,5000);     // update harga tiap 5 detik
-setInterval(updateBets,1000);      // update running bets tiap 1 detik
-renderCompleted();
 </script>
 
 </body>
