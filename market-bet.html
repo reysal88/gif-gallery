@@ -120,8 +120,9 @@ input[type="number"] {
 </div>
 
 <script>
+// ====== CONFIG ======
 const markets = ["BTC","ETH","SOL","BNB","AVAX"];
-let marketData = {};
+let marketData = {};      // menyimpan harga terakhir
 let wallet = 1000;
 let runningBets = [];
 let completedBets = [];
@@ -136,18 +137,22 @@ function saveData(){
   localStorage.setItem("wallet", wallet);
   localStorage.setItem("runningBets", JSON.stringify(runningBets));
   localStorage.setItem("completedBets", JSON.stringify(completedBets));
+  localStorage.setItem("marketData", JSON.stringify(marketData));
 }
 
 function loadData(){
   const w = localStorage.getItem("wallet");
   const r = localStorage.getItem("runningBets");
   const c = localStorage.getItem("completedBets");
+  const m = localStorage.getItem("marketData");
 
   if(w) wallet = parseInt(w);
   if(r) runningBets = JSON.parse(r);
   if(c) completedBets = JSON.parse(c);
+  if(m) marketData = JSON.parse(m);
 
   document.getElementById("rlo").innerText = wallet;
+  renderMarkets();
   renderCompleted();
 }
 loadData();
@@ -176,30 +181,29 @@ function renderMarkets(){
 }
 
 // =======================
-// COINPAPRIKA API
+// COINGECKO API FETCH (ALWAYS SHOW)
 // =======================
 async function fetchPrices(){
   try {
-    const res = await fetch("https://api.coinpaprika.com/v1/tickers");
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,avalanche-2&vs_currencies=usd"
+    );
     const data = await res.json();
 
-    const btc = data.find(c => c.symbol === "BTC");
-    const eth = data.find(c => c.symbol === "ETH");
-    const sol = data.find(c => c.symbol === "SOL");
-    const bnb = data.find(c => c.symbol === "BNB");
-    const avax = data.find(c => c.symbol === "AVAX");
+    if(data.bitcoin) marketData.BTC = data.bitcoin.usd;
+    if(data.ethereum) marketData.ETH = data.ethereum.usd;
+    if(data.solana) marketData.SOL = data.solana.usd;
+    if(data.binancecoin) marketData.BNB = data.binancecoin.usd;
+    if(data["avalanche-2"]) marketData.AVAX = data["avalanche-2"].usd;
 
-    if(btc) marketData.BTC = btc.quotes.USD.price;
-    if(eth) marketData.ETH = eth.quotes.USD.price;
-    if(sol) marketData.SOL = sol.quotes.USD.price;
-    if(bnb) marketData.BNB = bnb.quotes.USD.price;
-    if(avax) marketData.AVAX = avax.quotes.USD.price;
-
-    renderMarkets();
-  } catch(e){
-    console.log(e);
+  } catch(e) {
+    console.log("CoinGecko API error:", e);
+    // tidak menghapus marketData, harga terakhir tetap muncul
   }
+
+  renderMarkets();
 }
+
 // =======================
 // OPEN BET
 // =======================
@@ -335,9 +339,10 @@ window.onclick = function(e){
   if(e.target.id==="confirmModal"){ document.getElementById("confirmModal").style.display="none"; }
 };
 
-fetchPrices();
-setInterval(fetchPrices,5000);
-setInterval(updateBets,1000);
+// ======= START FETCH & UPDATE =======
+fetchPrices();                     // fetch pertama kali
+setInterval(fetchPrices,5000);     // update harga tiap 5 detik
+setInterval(updateBets,1000);      // update running bets tiap 1 detik
 renderCompleted();
 </script>
 
