@@ -286,22 +286,23 @@ function updateBets(){
   }
   renderCompleted();
 }
+
 function settleBet(index){
   const bet = runningBets[index];
   let win=false;
-  let totalWin=0;
   if(bet.type==="SINGLE"){
     const currentPrice = marketData[bet.market];
     win = (bet.side==="UP"? currentPrice>=bet.entryPrice : currentPrice<bet.entryPrice);
     if(win){ wallet += bet.amount*2; }
+    completedBets.push({...bet, result: win? "WIN":"LOSE"});
   } else if(bet.type==="PARLAY"){
     win = bet.selections.every(sel=>{
       const currentPrice = marketData[sel.market];
       return sel.side==="UP"? currentPrice>=sel.price : currentPrice<sel.price;
     });
-    if(win){ totalWin = bet.amount*bet.multiple; wallet += totalWin; }
+    if(win){ wallet += bet.amount * bet.multiple; }
+    completedBets.push({...bet, result: win ? "WIN" : "LOSE"});
   }
-  completedBets.push({...bet, result: win? (totalWin || "WIN") : "LOSE"});
   runningBets.splice(index,1);
   document.getElementById("rlo").innerText = wallet;
   saveData();
