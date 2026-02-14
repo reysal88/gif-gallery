@@ -105,6 +105,46 @@ input[type="number"] { color:white; background:#333; border:1px solid #555; padd
 .market-logo {
   height: 32px;
 }
+.parlay-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 5px 0;
+  padding: 3px 8px;
+  background: #111;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.parlay-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.parlay-left span.emoji {
+  font-size: 20px;
+  flex-shrink: 0; /* Logo tidak akan turun */
+}
+
+.parlay-left .market-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.parlay-left .market-text span.market-name {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.parlay-left .market-text span.market-name.avax {
+  font-size: 12px; /* khusus AVAX */
+}
 </style>
 </head>
 <body>
@@ -311,23 +351,14 @@ function updateParlayList(){
 
   tempParlay.forEach((s,i)=>{
     const selDiv = document.createElement("div");
-    selDiv.style.display = "flex";
-    selDiv.style.justifyContent = "space-between";
-    selDiv.style.alignItems = "center";
-    selDiv.style.margin = "5px 0";
-    selDiv.style.padding = "3px 8px";
-    selDiv.style.background = "#111";
-    selDiv.style.borderRadius = "5px";
-    selDiv.style.fontSize = "14px";
+    selDiv.className = "parlay-item";
 
     selDiv.innerHTML = `
-      <div style="display:flex; align-items:center; gap:6px; min-width:0;">
-        <span style="font-size:20px; flex-shrink:0;">${getEmoji(s.market)}</span>
-        <div style="display:flex; flex-direction:column; justify-content:center; min-width:0; overflow:hidden;">
-          <span style="font-weight:bold;">${s.side==="UP"?'<span class="up-text">UP</span>':'<span class="down-text">DOWN</span>'}</span>
-          <span style="font-size:${s.market==='AVAX' ? '12px' : '14px'}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">
-            ${s.market} ${s.price.toFixed(2)}$
-          </span>
+      <div class="parlay-left">
+        <span class="emoji">${getEmoji(s.market)}</span>
+        <div class="market-text">
+          <span class="up-text">${s.side==="UP"?"UP":"DOWN"}</span>
+          <span class="market-name ${s.market==='AVAX'?'avax':''}">${s.market} ${s.price.toFixed(2)}$</span>
         </div>
       </div>
       <button onclick="removeParlay(${i})">Remove</button>
@@ -337,7 +368,7 @@ function updateParlayList(){
   });
 
   document.getElementById("parlayMultiple").innerText = tempParlay.length * 4;
-  }
+}
 function removeParlay(index){
   tempParlay.splice(index,1);
   updateParlayList();
