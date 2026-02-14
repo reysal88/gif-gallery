@@ -321,16 +321,15 @@ function updateParlayList(){
     selDiv.style.fontSize = "14px";
 
     selDiv.innerHTML = `
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-size:20px; line-height:1;">${getEmoji(s.market)}</span>
-        <div style="display:flex; flex-direction:column; justify-content:center; line-height:1.2;">
-          <span>${s.side==="UP"?'<span class="up-text">UP</span>':'<span class="down-text">DOWN</span>'}</span>
-          <span>${s.market} ${s.price.toFixed(2)}$</span>
-        </div>
-      </div>
-      <button onclick="removeParlay(${i})">Remove</button>
-    `;
-
+  <div style="display:flex; align-items:center; gap:6px;">
+    <span style="font-size:20px; display:flex; align-items:center;">${getEmoji(s.market)}</span>
+    <span style="display:flex; flex-direction:column; justify-content:center; line-height:1.2;">
+      <span>${s.side==="UP"?'<span class="up-text">UP</span>':'<span class="down-text">DOWN</span>'}</span>
+      <span>${s.market} ${s.price.toFixed(2)}$</span>
+    </span>
+  </div>
+  <button onclick="removeParlay(${i})">Remove</button>
+`;
     div.appendChild(selDiv);
   });
 
