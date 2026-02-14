@@ -9,38 +9,40 @@ body {
   margin:0;
   font-family:Arial;
   color:#fff;
-  background: radial-gradient(circle at top, #3a0066 0%, #140022 40%, #000 100%);
+  background: radial-gradient(circle at center, #4b0082 0%, #1a0033 40%, #000 100%);
   overflow-x:hidden;
   position:relative;
 }
 body::before {
   content: "";
   position: fixed;
-  top: 0;
-  left: -50%;
-  width: 200%;
-  height: 100%;
-  background: repeating-linear-gradient(
-    130deg,
-    rgba(200, 120, 255, 0.15) 0px,
-    rgba(200, 120, 255, 0.15) 2px,
-    transparent 2px,
-    transparent 80px
+  top: 50%;
+  left: 50%;
+  width: 1200px;
+  height: 1200px;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(200, 120, 255, 0.3) 0deg,
+    transparent 8deg,
+    transparent 20deg
   );
-  animation: moveWave 10s linear infinite,
-             fadeWave 5s ease-in-out infinite alternate;
-  pointer-events: none;
+  border-radius: 50%;
+  animation: cosmicSpin 20s linear infinite,
+             cosmicPulse 4s ease-in-out infinite alternate;
+  filter: blur(60px);
   z-index: -1;
+  pointer-events: none;
 }
 
-@keyframes moveWave {
-  from { transform: translateX(0); }
-  to { transform: translateX(300px); }
+@keyframes cosmicSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-@keyframes fadeWave {
-  from { opacity: 0.15; }
-  to { opacity: 0.5; }
+@keyframes cosmicPulse {
+  from { opacity: 0.3; }
+  to { opacity: 0.7; }
 }
 header { padding:15px; font-size:1.5em;}
 #wallet { position:fixed; top:15px; right:20px; font-weight:bold;}
