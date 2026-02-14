@@ -5,35 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rialo Market Bet Fun</title>
 <style>
-body { 
-  margin:0; 
-  font-family:Arial; 
+body {
+  margin:0;
+  font-family:Arial;
   color:#fff;
-  background: radial-gradient(circle at 30% 20%, #2a003f, #000 60%);
-  overflow-x: hidden;
+  background: radial-gradient(circle at top, #3a0066 0%, #140022 40%, #000 100%);
+  overflow-x:hidden;
+  position:relative;
 }
-  body::before {
+body::before {
   content: "";
   position: fixed;
-  top: -200px;
-  left: -200px;
-  width: 800px;
-  height: 800px;
-  background: conic-gradient(
-    from 0deg,
-    rgba(160, 0, 255, 0.2),
-    rgba(0, 255, 255, 0.1),
-    rgba(160, 0, 255, 0.2)
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    130deg,
+    rgba(200, 120, 255, 0.15) 0px,
+    rgba(200, 120, 255, 0.15) 2px,
+    transparent 2px,
+    transparent 80px
   );
-  border-radius: 50%;
-  animation: spin 20s linear infinite;
+  animation: moveWave 10s linear infinite,
+             fadeWave 5s ease-in-out infinite alternate;
+  pointer-events: none;
   z-index: -1;
-  filter: blur(120px);
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes moveWave {
+  from { transform: translateX(0); }
+  to { transform: translateX(300px); }
+}
+
+@keyframes fadeWave {
+  from { opacity: 0.15; }
+  to { opacity: 0.5; }
 }
 header { padding:15px; font-size:1.5em;}
 #wallet { position:fixed; top:15px; right:20px; font-weight:bold;}
