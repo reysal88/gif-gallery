@@ -190,13 +190,13 @@ function loadData(){
 loadData();
 function getEmoji(market){
   const icons = {
-    BTC: "🟠",
-    ETH: "🟣",
-    SOL: "🟢",
-    BNB: "🟡",
-    AVAX: "🔺"
+    BTC: "₿",     // paling mendekati asli
+    ETH: "◆",     // diamond shape
+    SOL: "≡",     // garis (mewakili layered logo)
+    BNB: "◈",     // diamond-ish
+    AVAX: "🔺"    // triangle
   };
-  return icons[market] || "⚪";
+  return icons[market] || "●";
 }
 // =======================
 // RENDER MARKETS
