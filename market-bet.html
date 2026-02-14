@@ -105,63 +105,7 @@ input[type="number"] { color:white; background:#333; border:1px solid #555; padd
 .market-logo {
   height: 32px;
 }
-.parlay-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 5px 0;
-  padding: 3px 8px;
-  background: #111;
-  border-radius: 5px;
-  font-size: 14px;
-}
 
-.parlay-left {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-
-.parlay-left span.emoji {
-  font-size: 20px;
-  flex-shrink: 0; /* Logo tidak akan turun */
-}
-
-.parlay-left .market-text {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.parlay-left .market-text span.market-name {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-.parlay-left .market-text span.market-name.avax {
-  font-size: 12px; /* khusus AVAX */
-}
-  /* ===== PATCH KHUSUS AVAX ===== */
-#parlayList div .left span:last-child {
-  font-size: 12px;       /* kecilkan teks AVAX */
-}
-
-#parlayList div .left span:first-child {
-  font-size: 20px;       /* logo tetap besar */
-  flex-shrink: 0;        /* logo tidak ikut mengecil */
-}
-
-#parlayList div .left div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  overflow: hidden;      /* text overflow supaya tidak dorong logo */
-}
 </style>
 </head>
 <body>
