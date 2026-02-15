@@ -105,6 +105,39 @@ input[type="number"] { color:white; background:#333; border:1px solid #555; padd
 .market-logo {
   height: 32px;
 }
+/* Container parlay selection di tengah modal */
+#parlayMarkets {
+  display: flex;
+  flex-direction: column; /* satu per satu baris */
+  align-items: center;    /* center seluruh container horizontal */
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+/* Setiap baris market */
+#parlayMarkets div {
+  display: flex;
+  justify-content: space-between; /* label kiri, tombol kanan */
+  align-items: center;
+  width: 250px;    /* tetap sama lebar semua baris */
+}
+
+/* Label market rata kiri */
+#parlayMarkets div span.market-label {
+  width: 80px;       /* lebar tetap untuk semua label */
+  text-align: left;  
+}
+
+/* Tombol UP/DOWN */
+#parlayMarkets div button {
+  width: 70px;      /* tombol sama besar */
+  padding: 5px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 5px;
+}
 </style>
 </head>
 <body>
