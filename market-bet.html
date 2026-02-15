@@ -105,68 +105,30 @@ input[type="number"] { color:white; background:#333; border:1px solid #555; padd
 .market-logo {
   height: 32px;
 }
-/* Container parlay selection di tengah modal */
-#parlayMarkets {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-/* Setiap baris market */
 #parlayMarkets div {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 250px;   /* tetap lebar sama */
-}
-
-/* Label market rata kiri */
-#parlayMarkets div .market-name {
-  display: inline-block;
-  width: 50px;       /* semua nama market punya lebar sama */
-  text-align: left;
-}
-
-/* Tanda ":" */
-#parlayMarkets div .colon {
-  width: 10px;
-  text-align: left;
-}
-
-/* Tombol UP/DOWN */
-#parlayMarkets div button {
-  width: 70px;
-  padding: 5px;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-left: 5px;
-}
-#parlayMarkets div {
-  display: flex;
-  align-items: center; /* semua item di baris sama rata vertikal */
+  align-items: center;    /* sejajar vertikal */
   justify-content: flex-start;
-  width: 250px;  /* lebar tetap */
+  width: 250px;
   gap: 5px;
 }
 
-/* Logo market */
 #parlayMarkets div .market-logo {
   display: inline-block;
-  width: 20px;          /* lebar tetap */
+  width: 20px;
   text-align: center;
+  font-size: 18px;
+  line-height: 1;
+  vertical-align: middle; /* penting untuk emoji sejajar */
 }
 
-/* Nama market */
 #parlayMarkets div .market-name {
-  flex: 1;              /* isi sisa baris */
+  flex: 1;
   text-align: left;
+  line-height: 1.2;
+  vertical-align: middle;
 }
 
-/* Tanda ":" */
 #parlayMarkets div .colon {
   width: 10px;
   text-align: left;
